@@ -1,0 +1,16 @@
+{
+  "name": "path-class",
+  "version": "0.1.0",
+  "author": "Lucas Garron <code@garron.net>",
+  "type": "module",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.5",
+    "@cubing/dev-config": "^0.3.6"
+  },
+  "dependencies": {
+    "@types/node": "^24.7.0",
+    "trash": "^10.0.0",
+    "xdg-basedir": "^5.1.0"
+  }
+}
