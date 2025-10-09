@@ -53,8 +53,8 @@ export class Path {
     return new Path(dirname(this.#path));
   }
 
-  get basename(): string {
-    return basename(this.#path);
+  get basename(): Path {
+    return new Path(basename(this.#path));
   }
 
   async exists(constraints?: {
