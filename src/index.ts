@@ -118,7 +118,7 @@ export class Path {
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
-  async copy(destination: string | URL | Path): Promise<void> {
+  async cp(destination: string | URL | Path): Promise<void> {
     await cp(this.#path, new Path(destination).#path);
   }
 
