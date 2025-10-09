@@ -175,5 +175,3 @@ export class Path {
     state: new Path(xdgState ?? Path.homedir.join(".local/state")),
   };
 }
-
-console.log(await Path.homedir.join("Downloads/pony.mp3/").exists());
