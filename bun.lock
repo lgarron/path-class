@@ -10,6 +10,7 @@
       "devDependencies": {
         "@biomejs/biome": "^2.2.5",
         "@cubing/dev-config": "^0.3.6",
+        "esbuild": "^0.25.10",
       },
     },
   },

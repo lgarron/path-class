@@ -3,14 +3,26 @@
   "version": "0.1.1-dev",
   "author": "Lucas Garron <code@garron.net>",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/lib/path-class/index.js",
+  "types": "./dist/lib/path-class/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib/path-class/index.d.ts",
+      "import": "./dist/lib/path-class/index.js"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
-    "@cubing/dev-config": "^0.3.6"
+    "@cubing/dev-config": "^0.3.6",
+    "esbuild": "^0.25.10"
   },
   "dependencies": {
     "@types/node": "^24.7.0",
     "trash": "^10.0.0",
     "xdg-basedir": "^5.1.0"
-  }
+  },
+  "files": [
+    "./dist/",
+    "./src"
+  ]
 }
