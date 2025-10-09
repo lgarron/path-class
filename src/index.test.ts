@@ -81,6 +81,14 @@ test(".extname", async () => {
   expect(() => new Path("/").extname).toThrow();
 });
 
+test("trash", async () => {
+  const tempDir = await Path.makeTempDir();
+  expect(tempDir.toString()).toContain("/js-temp-");
+  expect(await tempDir.exists()).toBe(true);
+  await tempDir.trash();
+  expect(await tempDir.exists()).toBe(false);
+});
+
 test("homedir", async () => {
   expect(Path.homedir.toString()).toEqual("/mock/home/dir");
 });

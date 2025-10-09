@@ -1,5 +1,13 @@
-import { cp, mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rename,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { default as trash } from "trash";
@@ -145,6 +153,13 @@ export class Path {
   // TODO: check idempotency semantics when the destination exists and is a folder.
   async rename(destination: string | URL | Path): Promise<void> {
     await rename(this.#path, new Path(destination).#path);
+  }
+
+  /** Create a temporary dir inside the global temp dir for the current user. */
+  static async makeTempDir(prefix?: string): Promise<Path> {
+    return new Path(
+      await mkdtemp(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
+    );
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
