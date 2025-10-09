@@ -13,6 +13,10 @@ build-types: setup
 setup:
 	bun install --frozen-lockfile
 
+.PHONY: test
+test:
+	bun test
+
 .PHONY: lint
 lint: setup
 	bun x @biomejs/biome check

@@ -75,6 +75,11 @@ export class Path {
     }
     switch (constraints?.mustBe) {
       case "file": {
+        if (this.#path.endsWith("/")) {
+          throw new Error(
+            "Path ends with a slash, which cann accepted as file.",
+          );
+        }
         if (stats.isFile()) {
           return true;
         }
@@ -142,3 +147,5 @@ export class Path {
     state: new Path(xdgState ?? Path.homedir.join(".local/state")),
   };
 }
+
+console.log(await Path.homedir.join("Downloads/pony.mp3/").exists());
