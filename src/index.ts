@@ -149,7 +149,7 @@ export class Path {
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
   async trash(): Promise<void> {
-    await trash(this.#path);
+    await trash(this.#path, { glob: false });
   }
 
   async fileText(): Promise<string> {
