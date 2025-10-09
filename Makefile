@@ -20,6 +20,7 @@ test:
 .PHONY: lint
 lint: setup
 	bun x @biomejs/biome check
+	bun x tsc --project .
 
 .PHONY: format
 format: setup
