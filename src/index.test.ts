@@ -50,7 +50,13 @@ test(".parent", async () => {
   expect(new Path("dir/").parent.toString()).toEqual(".");
 });
 
-test(".basename)", async () => {
+test(".dirname", async () => {
+  expect(new Path("/").dirname.toString()).toEqual("/");
+  expect(new Path("dir").dirname.toString()).toEqual(".");
+  expect(new Path("dir/").dirname.toString()).toEqual(".");
+});
+
+test(".basename", async () => {
   expect(new Path("/").basename.toString()).toEqual("."); // TODO?
   expect(new Path("dir").basename.toString()).toEqual("dir");
   expect(new Path("dir/").basename.toString()).toEqual("dir");
@@ -59,13 +65,20 @@ test(".basename)", async () => {
   );
 });
 
-test(".dirname)", async () => {
-  expect(new Path("/").dirname.toString()).toEqual("."); // TODO?
-  expect(new Path("dir").dirname.toString()).toEqual("dir");
-  expect(new Path("dir/").dirname.toString()).toEqual("dir");
-  expect(Path.xdg.config.join("foo/bar.json").dirname.toString()).toEqual(
-    "bar.json",
-  );
+test(".extension", async () => {
+  expect(new Path("foo.txt").extension).toEqual(".txt");
+  expect(new Path("foo.").extension).toEqual(".");
+  expect(new Path("foo").extension).toEqual("");
+  expect(() => new Path("dir/").extension).toThrow();
+  expect(() => new Path("/").extension).toThrow();
+});
+
+test(".extname", async () => {
+  expect(new Path("foo.txt").extname).toEqual(".txt");
+  expect(new Path("foo.").extname).toEqual(".");
+  expect(new Path("foo").extname).toEqual("");
+  expect(() => new Path("dir/").extname).toThrow();
+  expect(() => new Path("/").extname).toThrow();
 });
 
 test("homedir", async () => {

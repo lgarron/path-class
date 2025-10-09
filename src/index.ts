@@ -1,6 +1,6 @@
 import { cp, mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { default as trash } from "trash";
 import { xdgCache, xdgConfig, xdgData, xdgState } from "xdg-basedir";
@@ -53,16 +53,37 @@ export class Path {
     return new Path(dirname(this.#path));
   }
 
-  // Normally I'd stick with the `node` name, but I think `.dirname` is a poor
-  // name. So we support `.dirname` it but mark it as deprecated, even if it will never be
-  // removes.
-  /** @deprecated Alias for `.parent()`. */
+  // Normally I'd stick with `node`'s name, but I think `.dirname` is a
+  // particularly poor name. So we support `.dirname` for discovery but mark it
+  // as deprecated, even if it will never be removed.
+  /** @deprecated Alias for `.parent`. */
   get dirname(): Path {
     return this.parent;
   }
 
   get basename(): Path {
     return new Path(basename(this.#path));
+  }
+
+  get extension(): string {
+    this.#mustNotHaveTrailingSlash();
+    return extname(this.#path);
+  }
+
+  // Normally I'd stick with `node`'s name, but I think `.extname` is a
+  // particularly poor name. So we support `.extname` for discovery but mark it
+  // as deprecated, even if it will never be removed.
+  /** @deprecated Alias for `.extension`. */
+  get extname(): string {
+    return this.extension;
+  }
+
+  #mustNotHaveTrailingSlash(): void {
+    if (this.#path.endsWith("/")) {
+      throw new Error(
+        "Path ends with a slash, which cannot be treated as a file.",
+      );
+    }
   }
 
   async exists(constraints?: {
@@ -83,11 +104,7 @@ export class Path {
     }
     switch (constraints?.mustBe) {
       case "file": {
-        if (this.#path.endsWith("/")) {
-          throw new Error(
-            "Path ends with a slash, which cann accepted as file.",
-          );
-        }
+        this.#mustNotHaveTrailingSlash();
         if (stats.isFile()) {
           return true;
         }
@@ -118,8 +135,11 @@ export class Path {
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
-  async cp(destination: string | URL | Path): Promise<void> {
-    await cp(this.#path, new Path(destination).#path);
+  async cp(
+    destination: string | URL | Path,
+    options?: Parameters<typeof cp>[2],
+  ): Promise<void> {
+    await cp(this.#path, new Path(destination).#path, options);
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
