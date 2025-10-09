@@ -44,11 +44,28 @@ test(".extendBasename(…)", async () => {
   ).toEqual("file.mp4..hevc.qv65.mov");
 });
 
-test(".parent()", async () => {
+test(".parent", async () => {
   expect(new Path("/").parent.toString()).toEqual("/");
   expect(new Path("dir").parent.toString()).toEqual(".");
   expect(new Path("dir/").parent.toString()).toEqual(".");
-  // Trailing dots should not be removed
+});
+
+test(".basename)", async () => {
+  expect(new Path("/").basename.toString()).toEqual("."); // TODO?
+  expect(new Path("dir").basename.toString()).toEqual("dir");
+  expect(new Path("dir/").basename.toString()).toEqual("dir");
+  expect(Path.xdg.config.join("foo/bar.json").basename.toString()).toEqual(
+    "bar.json",
+  );
+});
+
+test(".dirname)", async () => {
+  expect(new Path("/").dirname.toString()).toEqual("."); // TODO?
+  expect(new Path("dir").dirname.toString()).toEqual("dir");
+  expect(new Path("dir/").dirname.toString()).toEqual("dir");
+  expect(Path.xdg.config.join("foo/bar.json").dirname.toString()).toEqual(
+    "bar.json",
+  );
 });
 
 test("homedir", async () => {

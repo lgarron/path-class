@@ -53,6 +53,14 @@ export class Path {
     return new Path(dirname(this.#path));
   }
 
+  // Normally I'd stick with the `node` name, but I think `.dirname` is a poor
+  // name. So we support `.dirname` it but mark it as deprecated, even if it will never be
+  // removes.
+  /** @deprecated Alias for `.parent()`. */
+  get dirname(): Path {
+    return this.parent;
+  }
+
   get basename(): Path {
     return new Path(basename(this.#path));
   }
