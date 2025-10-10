@@ -6,7 +6,7 @@ const nodeOSMocked = {
   homedir: () => "/mock/home/dir",
 };
 // biome-ignore lint/suspicious/noExplicitAny: This isn't worth wrangling types for.
-(nodeOSMocked as any).default = nodeOSMocked;
+(nodeOSMocked as any).default = nodeOSMocked; // Needed because `xdg-basedir` imports the default.
 
 mock.module("node:os", () => {
   return nodeOSMocked;
