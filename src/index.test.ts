@@ -81,6 +81,36 @@ test(".extname", async () => {
   expect(() => new Path("/").extname).toThrow();
 });
 
+test(".existsAsFile()", async () => {
+  const filePath = (await Path.makeTempDir()).join("file.txt");
+  expect(await filePath.exists()).toBe(false);
+  expect(await filePath.exists({ mustBe: "file" })).toBe(false);
+  expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
+  expect(await filePath.existsAsFile()).toBe(false);
+  await filePath.write("test");
+  expect(await filePath.exists()).toBe(true);
+  expect(await filePath.exists({ mustBe: "file" })).toBe(true);
+  expect(() => filePath.exists({ mustBe: "directory" })).toThrow(
+    /Path exists but is not a directory/,
+  );
+  expect(await filePath.existsAsFile()).toBe(true);
+});
+
+test(".existsAsDir()", async () => {
+  const filePath = await Path.makeTempDir();
+  expect(await filePath.exists()).toBe(true);
+  expect(() => filePath.exists({ mustBe: "file" })).toThrow(
+    /Path exists but is not a file/,
+  );
+  expect(await filePath.exists({ mustBe: "directory" })).toBe(true);
+  expect(await filePath.existsAsDir()).toBe(true);
+  await filePath.trash();
+  expect(await filePath.exists()).toBe(false);
+  expect(await filePath.exists({ mustBe: "file" })).toBe(false);
+  expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
+  expect(await filePath.existsAsDir()).toBe(false);
+});
+
 test("trash", async () => {
   const tempDir = await Path.makeTempDir();
   expect(tempDir.toString()).toContain("/js-temp-");
