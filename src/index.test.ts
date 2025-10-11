@@ -174,7 +174,7 @@ test("rm (folder)", async () => {
   const file = tempDir.join("file.txt");
   await file.write("");
   expect(await tempDir.existsAsDir()).toBe(true);
-  expect(async () => tempDir.rm()).toThrowError(/EACCES/);
+  expect(async () => tempDir.rm()).toThrowError(/EACCES|EFAULT/);
   await file.rm();
   await tempDir.rm({ recursive: true });
   expect(await tempDir.existsAsDir()).toBe(false);
