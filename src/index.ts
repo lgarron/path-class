@@ -189,6 +189,24 @@ export class Path {
     await writeFile(this.#path, data, options);
   }
 
+  /**
+   * If only `data` is provided, this is equivalent to:
+   *
+   *     .write(JSON.stringify(data, null, "  "));
+   *
+   * `replacer` and `space` can also be specified, making this equivalent to:
+   *
+   *     .write(JSON.stringify(data, replacer, space));
+   *
+   */
+  async writeJSON<T>(
+    data: T,
+    replacer: Parameters<typeof JSON.stringify>[1] = null,
+    space: Parameters<typeof JSON.stringify>[2] = "  ",
+  ) {
+    await this.write(JSON.stringify(data, replacer, space));
+  }
+
   static get homedir(): Path {
     return new Path(homedir());
   }
