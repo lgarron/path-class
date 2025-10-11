@@ -26,5 +26,8 @@
   "files": [
     "./dist/",
     "./src"
-  ]
+  ],
+  "scripts": {
+    "prepublishOnly": "make prepublishOnly"
+  }
 }
