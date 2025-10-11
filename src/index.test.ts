@@ -141,9 +141,19 @@ test(".rename()", async () => {
   expect(await file2.exists()).toBe(true);
 });
 
-test("trash", async () => {
+test(".makeTempDir(…)", async () => {
   const tempDir = await Path.makeTempDir();
   expect(tempDir.toString()).toContain("/js-temp-");
+  expect(tempDir.basename.toString()).toStartWith("js-temp-");
+  expect(await tempDir.existsAsDir()).toBe(true);
+
+  const tempDir2 = await Path.makeTempDir("foo");
+  expect(tempDir2.toString()).not.toContain("/js-temp-");
+  expect(tempDir2.basename.toString()).toStartWith("foo");
+});
+
+test("trash", async () => {
+  const tempDir = await Path.makeTempDir();
   expect(await tempDir.exists()).toBe(true);
   await tempDir.trash();
   expect(await tempDir.exists()).toBe(false);
