@@ -138,8 +138,15 @@ export class Path {
     return this.exists({ mustBe: "directory" });
   }
 
-  async mkdir(options: Parameters<typeof mkdir>[1]): Promise<void> {
-    await mkdir(this.#path, options);
+  // Defaults to `recursive: true`.
+  async mkdir(options?: Parameters<typeof mkdir>[1]): Promise<void> {
+    const optionsObject = (() => {
+      if (typeof options === "string" || typeof options === "number") {
+        return { mode: options };
+      }
+      return options ?? {};
+    })();
+    await mkdir(this.#path, { recursive: true, ...optionsObject });
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.

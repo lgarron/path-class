@@ -111,6 +111,21 @@ test(".existsAsDir()", async () => {
   expect(await filePath.existsAsDir()).toBe(false);
 });
 
+test("mkdir (un-nested)", async () => {
+  const dir = (await Path.makeTempDir()).join("mkdir-test");
+  expect(await dir.exists()).toBe(false);
+  await dir.mkdir();
+  expect(await dir.exists()).toBe(true);
+});
+
+test("mkdir (nested)", async () => {
+  const dir = (await Path.makeTempDir()).join("mkdir-test/nested");
+  expect(await dir.exists()).toBe(false);
+  expect(() => dir.mkdir({ recursive: false })).toThrow("no such file");
+  await dir.mkdir();
+  expect(await dir.exists()).toBe(true);
+});
+
 test("trash", async () => {
   const tempDir = await Path.makeTempDir();
   expect(tempDir.toString()).toContain("/js-temp-");
