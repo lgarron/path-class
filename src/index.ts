@@ -4,6 +4,7 @@ import {
   mkdtemp,
   readFile,
   rename,
+  rm,
   stat,
   writeFile,
 } from "node:fs/promises";
@@ -177,6 +178,20 @@ export class Path {
 
   async trash(): Promise<void> {
     await trash(this.#path, { glob: false });
+  }
+
+  async rm(options?: Parameters<typeof rm>[1]): Promise<void> {
+    await rm(this.#path, options);
+  }
+
+  /**
+   * Equivalent to:
+   *
+   *     .rm({ recursive: true, force: true, ...(options ?? {}) })
+   *
+   */
+  async rm_rf(options?: Parameters<typeof rm>[1]): Promise<void> {
+    await this.rm({ recursive: true, force: true, ...(options ?? {}) });
   }
 
   async fileText(): Promise<string> {

@@ -159,6 +159,50 @@ test("trash", async () => {
   expect(await tempDir.exists()).toBe(false);
 });
 
+test("rm (file)", async () => {
+  const file = (await Path.makeTempDir()).join("file.txt");
+  await file.write("");
+  expect(await file.existsAsFile()).toBe(true);
+  await file.rm();
+  expect(await file.existsAsFile()).toBe(false);
+  expect(await file.parent.existsAsDir()).toBe(true);
+  expect(async () => file.rm()).toThrowError(/ENOENT/);
+});
+
+test("rm (folder)", async () => {
+  const tempDir = await Path.makeTempDir();
+  const file = tempDir.join("file.txt");
+  await file.write("");
+  expect(await tempDir.existsAsDir()).toBe(true);
+  expect(async () => tempDir.rm()).toThrowError(/EACCES/);
+  await file.rm();
+  await tempDir.rm({ recursive: true });
+  expect(await tempDir.existsAsDir()).toBe(false);
+  expect(async () => tempDir.rm()).toThrowError(/ENOENT/);
+});
+
+test("rm_rf (file)", async () => {
+  const file = (await Path.makeTempDir()).join("file.txt");
+  await file.write("");
+  expect(await file.existsAsFile()).toBe(true);
+  await file.rm_rf();
+  expect(await file.existsAsFile()).toBe(false);
+  expect(await file.parent.existsAsDir()).toBe(true);
+  await file.rm_rf();
+  expect(await file.existsAsFile()).toBe(false);
+});
+
+test("rm_rf (folder)", async () => {
+  const tempDir = await Path.makeTempDir();
+  await tempDir.join("file.txt").write("");
+  expect(tempDir.toString()).toContain("/js-temp-");
+  expect(await tempDir.exists()).toBe(true);
+  await tempDir.rm_rf();
+  expect(await tempDir.exists()).toBe(false);
+  await tempDir.rm_rf();
+  expect(await tempDir.exists()).toBe(false);
+});
+
 test(".fileText()", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("hi");
