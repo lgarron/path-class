@@ -182,8 +182,11 @@ export class Path {
     return JSON.parse(await this.fileText());
   }
 
-  async write(s: string): Promise<void> {
-    await writeFile(this.#path, s);
+  async write(
+    data: Parameters<typeof writeFile>[1],
+    options?: Parameters<typeof writeFile>[2],
+  ): Promise<void> {
+    await writeFile(this.#path, data, options);
   }
 
   static get homedir(): Path {

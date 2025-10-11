@@ -169,6 +169,13 @@ test(".fileJSON()", async () => {
   >({ foo: "bar" });
 });
 
+test(".write(…)", async () => {
+  const file = (await Path.makeTempDir()).join("file.json");
+  await file.write("foo");
+
+  expect(await file.fileText()).toEqual("foo");
+});
+
 test("homedir", async () => {
   expect(Path.homedir.toString()).toEqual("/mock/home/dir");
 });
