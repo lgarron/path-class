@@ -34,7 +34,7 @@ export class Path {
     throw new Error("Invalid path");
   }
 
-  #setNormalizedPath(path: string) {
+  #setNormalizedPath(path: string): void {
     this.#path = join(path);
   }
 
@@ -139,7 +139,7 @@ export class Path {
   }
 
   // Defaults to `recursive: true`.
-  async mkdir(options?: Parameters<typeof mkdir>[1]): Promise<void> {
+  async mkdir(options?: Parameters<typeof mkdir>[1]): Promise<Path> {
     const optionsObject = (() => {
       if (typeof options === "string" || typeof options === "number") {
         return { mode: options };
@@ -147,14 +147,17 @@ export class Path {
       return options ?? {};
     })();
     await mkdir(this.#path, { recursive: true, ...optionsObject });
+    return this;
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
+  /** Returns the destination path. */
   async cp(
     destination: string | URL | Path,
     options?: Parameters<typeof cp>[2],
-  ): Promise<void> {
+  ): Promise<Path> {
     await cp(this.#path, new Path(destination).#path, options);
+    return new Path(destination);
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
@@ -169,7 +172,6 @@ export class Path {
     );
   }
 
-  // TODO: check idempotency semantics when the destination exists and is a folder.
   async trash(): Promise<void> {
     await trash(this.#path, { glob: false });
   }
@@ -182,11 +184,13 @@ export class Path {
     return JSON.parse(await this.fileText());
   }
 
+  /** Returns the original `Path` (for chaining). */
   async write(
     data: Parameters<typeof writeFile>[1],
     options?: Parameters<typeof writeFile>[2],
-  ): Promise<void> {
+  ): Promise<Path> {
     await writeFile(this.#path, data, options);
+    return this;
   }
 
   /**
@@ -198,13 +202,15 @@ export class Path {
    *
    *     .write(JSON.stringify(data, replacer, space));
    *
+   * Returns the original `Path` (for chaining).
    */
   async writeJSON<T>(
     data: T,
     replacer: Parameters<typeof JSON.stringify>[1] = null,
     space: Parameters<typeof JSON.stringify>[2] = "  ",
-  ) {
+  ): Promise<Path> {
     await this.write(JSON.stringify(data, replacer, space));
+    return this;
   }
 
   static get homedir(): Path {
