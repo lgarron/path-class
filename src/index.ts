@@ -138,7 +138,10 @@ export class Path {
     return this.exists({ mustBe: "directory" });
   }
 
-  // Defaults to `recursive: true`.
+  // I don't think `mkdir` is a great name, but it does match the
+  // well-established canonical commandline name. So in this case we keep the
+  // awkward abbreviation.
+  /** Defaults to `recursive: true`. */
   async mkdir(options?: Parameters<typeof mkdir>[1]): Promise<Path> {
     const optionsObject = (() => {
       if (typeof options === "string" || typeof options === "number") {
