@@ -4,65 +4,65 @@ import { join } from "node:path";
 import { Path } from ".";
 
 test("constructor", async () => {
-  expect(new Path("foo").toString()).toEqual("foo");
-  expect(new Path("./relative").toString()).toEqual("relative");
-  expect(new Path("./relative/nested").toString()).toEqual("relative/nested");
-  expect(new Path("/absolute").toString()).toEqual("/absolute");
-  expect(new Path("/absolute/nested").toString()).toEqual("/absolute/nested");
-  expect(new Path("trailing/slash/").toString()).toEqual("trailing/slash/");
+  expect(new Path("foo").path).toEqual("foo");
+  expect(new Path("./relative").path).toEqual("relative");
+  expect(new Path("./relative/nested").path).toEqual("relative/nested");
+  expect(new Path("/absolute").path).toEqual("/absolute");
+  expect(new Path("/absolute/nested").path).toEqual("/absolute/nested");
+  expect(new Path("trailing/slash/").path).toEqual("trailing/slash/");
 });
 
 test("normalize", async () => {
-  expect(new Path("foo//bar").toString()).toEqual("foo/bar");
-  expect(new Path("foo////bar").toString()).toEqual("foo/bar");
-  expect(new Path("foo/bar/").toString()).toEqual("foo/bar/");
-  expect(new Path("foo/bar//").toString()).toEqual("foo/bar/");
-  expect(new Path("//absolute////bar").toString()).toEqual("/absolute/bar");
+  expect(new Path("foo//bar").path).toEqual("foo/bar");
+  expect(new Path("foo////bar").path).toEqual("foo/bar");
+  expect(new Path("foo/bar/").path).toEqual("foo/bar/");
+  expect(new Path("foo/bar//").path).toEqual("foo/bar/");
+  expect(new Path("//absolute////bar").path).toEqual("/absolute/bar");
 });
 
 test("join", async () => {
-  expect(new Path("foo").join("bar").toString()).toEqual("foo/bar");
-  expect(new Path("foo/bar").join("bath", "kitchen/sink").toString()).toEqual(
+  expect(new Path("foo").join("bar").path).toEqual("foo/bar");
+  expect(new Path("foo/bar").join("bath", "kitchen/sink").path).toEqual(
     "foo/bar/bath/kitchen/sink",
   );
 });
 
 test("traverse", async () => {
-  expect(new Path("foo/bar").join("..").toString()).toEqual("foo");
-  expect(new Path("foo/bar").join(".").toString()).toEqual("foo/bar");
-  expect(new Path("foo/bar").join("../baz").toString()).toEqual("foo/baz");
-  expect(new Path("/absolute/path").join("../..").toString()).toEqual("/");
-  expect(new Path("/absolute/path").join("../../..").toString()).toEqual("/");
-  expect(new Path("/").join("..").toString()).toEqual("/");
+  expect(new Path("foo/bar").join("..").path).toEqual("foo");
+  expect(new Path("foo/bar").join(".").path).toEqual("foo/bar");
+  expect(new Path("foo/bar").join("../baz").path).toEqual("foo/baz");
+  expect(new Path("/absolute/path").join("../..").path).toEqual("/");
+  expect(new Path("/absolute/path").join("../../..").path).toEqual("/");
+  expect(new Path("/").join("..").path).toEqual("/");
 });
 
 test(".extendBasename(…)", async () => {
-  expect(
-    new Path("file.mp4").extendBasename(".hevc.qv65.mov").toString(),
-  ).toEqual("file.mp4.hevc.qv65.mov");
+  expect(new Path("file.mp4").extendBasename(".hevc.qv65.mov").path).toEqual(
+    "file.mp4.hevc.qv65.mov",
+  );
   // Trailing dots should not be removed.
-  expect(
-    new Path("file.mp4.").extendBasename(".hevc.qv65.mov").toString(),
-  ).toEqual("file.mp4..hevc.qv65.mov");
+  expect(new Path("file.mp4.").extendBasename(".hevc.qv65.mov").path).toEqual(
+    "file.mp4..hevc.qv65.mov",
+  );
 });
 
 test(".parent", async () => {
-  expect(new Path("/").parent.toString()).toEqual("/");
-  expect(new Path("dir").parent.toString()).toEqual(".");
-  expect(new Path("dir/").parent.toString()).toEqual(".");
+  expect(new Path("/").parent.path).toEqual("/");
+  expect(new Path("dir").parent.path).toEqual(".");
+  expect(new Path("dir/").parent.path).toEqual(".");
 });
 
 test(".dirname", async () => {
-  expect(new Path("/").dirname.toString()).toEqual("/");
-  expect(new Path("dir").dirname.toString()).toEqual(".");
-  expect(new Path("dir/").dirname.toString()).toEqual(".");
+  expect(new Path("/").dirname.path).toEqual("/");
+  expect(new Path("dir").dirname.path).toEqual(".");
+  expect(new Path("dir/").dirname.path).toEqual(".");
 });
 
 test(".basename", async () => {
-  expect(new Path("/").basename.toString()).toEqual("."); // TODO?
-  expect(new Path("dir").basename.toString()).toEqual("dir");
-  expect(new Path("dir/").basename.toString()).toEqual("dir");
-  expect(Path.xdg.config.join("foo/bar.json").basename.toString()).toEqual(
+  expect(new Path("/").basename.path).toEqual("."); // TODO?
+  expect(new Path("dir").basename.path).toEqual("dir");
+  expect(new Path("dir/").basename.path).toEqual("dir");
+  expect(Path.xdg.config.join("foo/bar.json").basename.path).toEqual(
     "bar.json",
   );
 });
@@ -144,13 +144,13 @@ test(".rename()", async () => {
 
 test(".makeTempDir(…)", async () => {
   const tempDir = await Path.makeTempDir();
-  expect(tempDir.toString()).toContain("/js-temp-");
-  expect(tempDir.basename.toString()).toStartWith("js-temp-");
+  expect(tempDir.path).toContain("/js-temp-");
+  expect(tempDir.basename.path).toStartWith("js-temp-");
   expect(await tempDir.existsAsDir()).toBe(true);
 
   const tempDir2 = await Path.makeTempDir("foo");
-  expect(tempDir2.toString()).not.toContain("/js-temp-");
-  expect(tempDir2.basename.toString()).toStartWith("foo");
+  expect(tempDir2.path).not.toContain("/js-temp-");
+  expect(tempDir2.basename.path).toStartWith("foo");
 });
 
 test("trash", async () => {
@@ -196,7 +196,7 @@ test("rm_rf (file)", async () => {
 test("rm_rf (folder)", async () => {
   const tempDir = await Path.makeTempDir();
   await tempDir.join("file.txt").write("");
-  expect(tempDir.toString()).toContain("/js-temp-");
+  expect(tempDir.path).toContain("/js-temp-");
   expect(await tempDir.exists()).toBe(true);
   await tempDir.rm_rf();
   expect(await tempDir.exists()).toBe(false);
@@ -210,7 +210,7 @@ test(".fileText()", async () => {
   await file.write("bye");
 
   expect(await file.fileText()).toBe("bye");
-  expect(await readFile(file.toString(), "utf-8")).toBe("bye");
+  expect(await readFile(file.path, "utf-8")).toBe("bye");
 });
 
 test(".fileJSON()", async () => {
@@ -219,7 +219,7 @@ test(".fileJSON()", async () => {
 
   expect(await file.fileJSON()).toEqual<Record<string, string>>({ foo: "bar" });
   expect(await file.fileJSON<Record<string, string>>()).toEqual({ foo: "bar" });
-  expect(await JSON.parse(await readFile(file.toString(), "utf-8"))).toEqual<
+  expect(await JSON.parse(await readFile(file.path, "utf-8"))).toEqual<
     Record<string, string>
   >({ foo: "bar" });
 });
@@ -229,14 +229,14 @@ test(".write(…)", async () => {
   const file = tempDir.join("file.json");
   await file.write("foo");
 
-  expect(
-    await readFile(join(tempDir.toString(), "./file.json"), "utf-8"),
-  ).toEqual("foo");
+  expect(await readFile(join(tempDir.path, "./file.json"), "utf-8")).toEqual(
+    "foo",
+  );
 
   const file2 = tempDir.join("nested/file2.json");
   await file2.write("bar");
   expect(
-    await readFile(join(tempDir.toString(), "./nested/file2.json"), "utf-8"),
+    await readFile(join(tempDir.path, "./nested/file2.json"), "utf-8"),
   ).toEqual("bar");
 });
 
@@ -259,12 +259,12 @@ test(".readDir(…)", async () => {
 });
 
 test("homedir", async () => {
-  expect(Path.homedir.toString()).toEqual("/mock/home/dir");
+  expect(Path.homedir.path).toEqual("/mock/home/dir");
 });
 
 test("XDG", async () => {
-  expect(Path.xdg.cache.toString()).toEqual("/mock/home/dir/.cache");
-  expect(Path.xdg.config.toString()).toEqual("/xdg/config");
-  expect(Path.xdg.data.toString()).toEqual("/mock/home/dir/.local/share");
-  expect(Path.xdg.state.toString()).toEqual("/mock/home/dir/.local/state");
+  expect(Path.xdg.cache.path).toEqual("/mock/home/dir/.cache");
+  expect(Path.xdg.config.path).toEqual("/xdg/config");
+  expect(Path.xdg.data.path).toEqual("/mock/home/dir/.local/share");
+  expect(Path.xdg.state.path).toEqual("/mock/home/dir/.local/state");
 });
