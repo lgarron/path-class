@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, spyOn, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Path } from ".";
@@ -267,4 +267,11 @@ test("XDG", async () => {
   expect(Path.xdg.config.path).toEqual("/xdg/config");
   expect(Path.xdg.data.path).toEqual("/mock/home/dir/.local/share");
   expect(Path.xdg.state.path).toEqual("/mock/home/dir/.local/state");
+});
+
+const spy = spyOn(console, "log");
+
+test("debugPrint", async () => {
+  Path.homedir.debugPrint("foo");
+  expect(spy.mock.calls).toEqual([["foo"], ["/mock/home/dir"]]);
 });

@@ -308,4 +308,21 @@ export class Path {
     data: new Path(xdgData ?? Path.homedir.join(".local/share")),
     state: new Path(xdgState ?? Path.homedir.join(".local/state")),
   };
+
+  /** Chainable function to print the path. Prints the same as:
+   *
+   *     if (args.length > 0) {
+   *      console.log(...args);
+   *     }
+   *     console.log(this.path);
+   *
+   */
+  // biome-ignore lint/suspicious/noExplicitAny: This is the correct type, based on `console.log(…)`.
+  debugPrint(...args: any[]): Path {
+    if (args.length > 0) {
+      console.log(...args);
+    }
+    console.log(this.#path);
+    return this;
+  }
 }
