@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { Path } from ".";
 
 test("constructor", async () => {
@@ -224,10 +225,19 @@ test(".fileJSON()", async () => {
 });
 
 test(".write(…)", async () => {
-  const file = (await Path.makeTempDir()).join("file.json");
+  const tempDir = await Path.makeTempDir();
+  const file = tempDir.join("file.json");
   await file.write("foo");
 
-  expect(await file.fileText()).toEqual("foo");
+  expect(
+    await readFile(join(tempDir.toString(), "./file.json"), "utf-8"),
+  ).toEqual("foo");
+
+  const file2 = tempDir.join("nested/file2.json");
+  await file2.write("bar");
+  expect(
+    await readFile(join(tempDir.toString(), "./nested/file2.json"), "utf-8"),
+  ).toEqual("bar");
 });
 
 test(".writeJSON(…)", async () => {

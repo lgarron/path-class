@@ -202,11 +202,15 @@ export class Path {
     return JSON.parse(await this.fileText());
   }
 
-  /** Returns the original `Path` (for chaining). */
+  /** Creates intermediate directories if they do not exist.
+   *
+   * Returns the original `Path` (for chaining).
+   */
   async write(
     data: Parameters<typeof writeFile>[1],
     options?: Parameters<typeof writeFile>[2],
   ): Promise<Path> {
+    await this.parent.mkdir();
     await writeFile(this.#path, data, options);
     return this;
   }
