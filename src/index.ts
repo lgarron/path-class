@@ -87,6 +87,13 @@ export class Path {
     this.#path = join(path);
   }
 
+  /**
+   * Same as `.toString()`, but more concise.
+   */
+  get path() {
+    return this.#path;
+  }
+
   toString(): string {
     return this.#path;
   }
