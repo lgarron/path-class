@@ -2,6 +2,7 @@ import {
   cp,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rename,
   rm,
@@ -13,8 +14,7 @@ import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { default as trash } from "trash";
 import { xdgCache, xdgConfig, xdgData, xdgState } from "xdg-basedir";
-
-// TODO: classes for relative vs. absolute?
+import type { readDirType } from "./readDir";
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
@@ -234,6 +234,14 @@ export class Path {
     await this.write(JSON.stringify(data, replacer, space));
     return this;
   }
+
+  // Normally we'd add a `@deprecated` alias named `.readdir`, but that would
+  // differ only by capitalization of a single non-leading character. This can
+  // be a bit confusing, especially when autocompleting. So for this function in
+  // particular we don't include an alias.
+  readDir: typeof readDirType = (options) =>
+    // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
+    readdir(this.#path, options as any) as any;
 
   static get homedir(): Path {
     return new Path(homedir());

@@ -247,6 +247,17 @@ test(".writeJSON(…)", async () => {
   expect(await file.fileJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
+test(".readDir(…)", async () => {
+  const dir = await Path.makeTempDir();
+  await dir.join("file.txt").write("hello");
+  await dir.join("dir/file.json").write("hello");
+
+  const contentsAsStrings = await dir.readDir();
+  expect(new Set(contentsAsStrings)).toEqual(new Set(["file.txt", "dir"]));
+
+  // const contentsAsEntries = await dir.readDir({ withFileTypes: true });
+});
+
 test("homedir", async () => {
   expect(Path.homedir.toString()).toEqual("/mock/home/dir");
 });
