@@ -1,6 +1,6 @@
 {
   "name": "path-class",
-  "version": "0.3.4-dev",
+  "version": "0.3.4",
   "author": "Lucas Garron <code@garron.net>",
   "type": "module",
   "main": "./dist/lib/path-class/index.js",
