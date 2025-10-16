@@ -106,7 +106,7 @@ test(".existsAsDir()", async () => {
   );
   expect(await filePath.exists({ mustBe: "directory" })).toBe(true);
   expect(await filePath.existsAsDir()).toBe(true);
-  await filePath.trash();
+  await filePath.rm_rf();
   expect(await filePath.exists()).toBe(false);
   expect(await filePath.exists({ mustBe: "file" })).toBe(false);
   expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
@@ -151,13 +151,6 @@ test(".makeTempDir(…)", async () => {
   const tempDir2 = await Path.makeTempDir("foo");
   expect(tempDir2.path).not.toContain("/js-temp-");
   expect(tempDir2.basename.path).toStartWith("foo");
-});
-
-test("trash", async () => {
-  const tempDir = await Path.makeTempDir();
-  expect(await tempDir.exists()).toBe(true);
-  await tempDir.trash();
-  expect(await tempDir.exists()).toBe(false);
 });
 
 test("rm (file)", async () => {

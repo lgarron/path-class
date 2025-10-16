@@ -13,7 +13,6 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { default as trash } from "trash";
 import { xdgCache, xdgConfig, xdgData, xdgState } from "xdg-basedir";
 
 // Modifying the type of `readdir(…)` from `node:fs/promises` to remove the
@@ -229,10 +228,6 @@ export class Path {
     return new Path(
       await mkdtemp(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
     );
-  }
-
-  async trash(): Promise<void> {
-    await trash(this.#path, { glob: false });
   }
 
   async rm(options?: Parameters<typeof rm>[1]): Promise<void> {
