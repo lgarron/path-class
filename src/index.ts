@@ -171,10 +171,14 @@ export class Path {
     return this.#path;
   }
 
-  /// Constructs a new path by appending the given path segments.
-  // TODO: accept `Path` inputs?
-  join(...segments: string[]): Path {
-    return new Path(join(this.#path, ...segments));
+  /** Constructs a new path by appending the given path segments.
+   * This follows `node` semantics for absolute paths: leading slashes in the given descendant segments are ignored.
+   */
+  join(...segments: (string | Path)[]): Path {
+    const segmentStrings = segments.map((segment) =>
+      segment instanceof Path ? segment.path : segment,
+    );
+    return new Path(join(this.#path, ...segmentStrings));
   }
 
   extendBasename(suffix: string): Path {

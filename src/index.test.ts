@@ -41,6 +41,11 @@ test("join", async () => {
   expect(new Path("foo/bar").join("bath", "kitchen/sink").path).toEqual(
     "foo/bar/bath/kitchen/sink",
   );
+  expect(new Path("foo").join(new Path("bar")).path).toEqual("foo/bar");
+  expect(
+    new Path("foo/bar").join("bath", new Path("kitchen/sink")).path,
+  ).toEqual("foo/bar/bath/kitchen/sink");
+  expect(new Path("foo").join(new Path("/bar")).path).toEqual("foo/bar");
 });
 
 test("traverse", async () => {
