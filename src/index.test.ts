@@ -28,6 +28,12 @@ test("Path.resolve(…)", async () => {
   );
 });
 
+test(".isAbsolutePath()", async () => {
+  expect(new Path("/foo/bar").isAbsolutePath()).toBe(true);
+  expect(new Path("foo/bar").isAbsolutePath()).toBe(false);
+  expect(new Path(import.meta.url).isAbsolutePath()).toBe(true);
+});
+
 test(".toFileURL()", async () => {
   expect(new Path("/foo/bar").toFileURL().toString()).toEqual(
     "file:///foo/bar",
