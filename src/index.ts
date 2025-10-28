@@ -149,14 +149,15 @@ export class Path {
   }
 
   /**
-   * The `Path` can have a trailing `/`, indicating that it represents a
+   * The `Path` can have a trailing slash, indicating that it represents a
    * directory. (If there is no trailing slash, it can represent either a file
    * or a directory.)
    *
    * Some operations will refuse to treat a directory path as a file path. This
    * function identifies such paths.
    */
-  isUnambiguousDirPath(): boolean {
+  hasTrailingSlash(): boolean {
+    // TODO: handle Windows semantically
     return this.#path.endsWith("/");
   }
 
@@ -220,7 +221,7 @@ export class Path {
   }
 
   #mustNotHaveTrailingSlash(): void {
-    if (this.isUnambiguousDirPath()) {
+    if (this.hasTrailingSlash()) {
       throw new Error(
         "Path ends with a slash, which cannot be treated as a file.",
       );
