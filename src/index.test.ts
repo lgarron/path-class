@@ -44,6 +44,17 @@ test(".toFileURL()", async () => {
   );
 });
 
+test(".hasTrailingSlash()", async () => {
+  expect(new Path("/foo/bar").hasTrailingSlash()).toBe(false);
+  expect(new Path("/foo/bar/").hasTrailingSlash()).toBe(true);
+  expect(new Path("foo/bar").hasTrailingSlash()).toBe(false);
+  expect(new Path("foo/bar/").hasTrailingSlash()).toBe(true);
+  expect(new Path(import.meta.url).hasTrailingSlash()).toBe(false);
+  expect(new Path(import.meta.url).join("/").hasTrailingSlash()).toBe(true);
+  expect(new Path(import.meta.url).join("/.").hasTrailingSlash()).toBe(false);
+  expect(new Path(import.meta.url).join(".").hasTrailingSlash()).toBe(false);
+});
+
 test("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");
