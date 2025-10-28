@@ -291,12 +291,12 @@ export class Path {
     await this.rm({ recursive: true, force: true, ...(options ?? {}) });
   }
 
-  async fileText(): Promise<string> {
+  async readText(): Promise<string> {
     return readFile(this.#path, "utf-8");
   }
 
-  async fileJSON<T>(): Promise<T> {
-    return JSON.parse(await this.fileText());
+  async readJSON<T>(): Promise<T> {
+    return JSON.parse(await this.readText());
   }
 
   /** Creates intermediate directories if they do not exist.

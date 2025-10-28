@@ -218,7 +218,7 @@ test(".fileText()", async () => {
   await file.write("hi");
   await file.write("bye");
 
-  expect(await file.fileText()).toBe("bye");
+  expect(await file.readText()).toBe("bye");
   expect(await readFile(file.path, "utf-8")).toBe("bye");
 });
 
@@ -226,8 +226,8 @@ test(".fileJSON()", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   await file.write(JSON.stringify({ foo: "bar" }));
 
-  expect(await file.fileJSON()).toEqual<Record<string, string>>({ foo: "bar" });
-  expect(await file.fileJSON<Record<string, string>>()).toEqual({ foo: "bar" });
+  expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
+  expect(await file.readJSON<Record<string, string>>()).toEqual({ foo: "bar" });
   expect(await JSON.parse(await readFile(file.path, "utf-8"))).toEqual<
     Record<string, string>
   >({ foo: "bar" });
@@ -253,7 +253,7 @@ test(".writeJSON(…)", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   await file.writeJSON({ foo: "bar" });
 
-  expect(await file.fileJSON()).toEqual<Record<string, string>>({ foo: "bar" });
+  expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
 test(".readDir(…)", async () => {
