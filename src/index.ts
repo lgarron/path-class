@@ -148,6 +148,15 @@ export class Path {
     return this.#path.startsWith("/");
   }
 
+  toFileURL(): URL {
+    if (!this.isAbsolutePath()) {
+      throw new Error(
+        "Tried to convert to file URL when the path is not absolute.",
+      );
+    }
+    return pathToFileURL(this.#path);
+  }
+
   /**
    * The `Path` can have a trailing slash, indicating that it represents a
    * directory. (If there is no trailing slash, it can represent either a file

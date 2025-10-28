@@ -28,6 +28,16 @@ test("Path.resolve(…)", async () => {
   );
 });
 
+test(".toFileURL()", async () => {
+  expect(new Path("/foo/bar").toFileURL().toString()).toEqual(
+    "file:///foo/bar",
+  );
+  expect(new Path("/foo/bar").toFileURL()).toEqual(new URL("file:///foo/bar"));
+  expect(() => new Path("foo/bar").toFileURL()).toThrow(
+    /Tried to convert to file URL when the path is not absolute\./,
+  );
+});
+
 test("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");
