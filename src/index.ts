@@ -74,8 +74,7 @@ export class Path {
    * Similar to `new URL(path, base)`, but accepting and returning `Path` objects.
    * Note that `base` must be one of:
    *
-   * - a `string` representing an absolute path,
-   * - a `URL` object, or
+   * - a valid second argument to `new URL(…)`.
    * - a `Path` representing an absolute path.
    *
    */
