@@ -66,6 +66,9 @@ declare function readDirType(options: {
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
   #path: string;
+  /**
+   * If `path` is a string starting with `file:///`, it will be parsed as a file URL.
+   */
   constructor(path: string | URL | Path) {
     this.#setNormalizedPath(Path.#pathlikeToString(path));
   }
@@ -101,6 +104,10 @@ export class Path {
       return fileURLToPath(path);
     }
     if (typeof path === "string") {
+      // TODO: allow turning off this heuristic?
+      if (path.startsWith("file:///")) {
+        return fileURLToPath(path);
+      }
       return path;
     }
     throw new Error("Invalid path");

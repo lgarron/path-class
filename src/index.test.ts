@@ -13,7 +13,19 @@ test("constructor", async () => {
 });
 
 test("Path.resolve(…)", async () => {
-  expect(Path.resolve("foo", new Path("/bar/baz")).path).toEqual("/bar/foo");
+  expect(Path.resolve("foo/lish", new Path("/bar/baz")).path).toEqual(
+    "/bar/foo/lish",
+  );
+  expect(() => Path.resolve("foo/lish", new Path("bar/baz")).path).toThrow(
+    /must be an absolute path/,
+  );
+  expect(Path.resolve("foo/lish", import.meta.url).path).toEqual(
+    new Path(import.meta.url).parent.join("foo/lish").path,
+  );
+  expect(Path.resolve("foo", "file:///hello/world").path).toEqual("/hello/foo");
+  expect(Path.resolve("foo", "file:///hello/world/").path).toEqual(
+    "/hello/world/foo",
+  );
 });
 
 test("normalize", async () => {
