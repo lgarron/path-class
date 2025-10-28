@@ -1,4 +1,5 @@
-import type { Dirent, ObjectEncodingOptions } from "node:fs";
+import type { Abortable } from "node:events";
+import type { Dirent, ObjectEncodingOptions, OpenMode } from "node:fs";
 import {
   cp,
   mkdir,
@@ -62,6 +63,32 @@ declare function readDirType(options: {
   withFileTypes: true;
   recursive?: boolean | undefined;
 }): Promise<Dirent<Buffer>[]>;
+
+declare function readFileType(
+  options?:
+    | ({
+        encoding?: null | undefined;
+        flag?: OpenMode | undefined;
+      } & Abortable)
+    | null,
+): Promise<Buffer>;
+declare function readFileType(
+  options:
+    | ({
+        encoding: BufferEncoding;
+        flag?: OpenMode | undefined;
+      } & Abortable)
+    | BufferEncoding,
+): Promise<string>;
+declare function readFileType(
+  options?:
+    | (ObjectEncodingOptions &
+        Abortable & {
+          flag?: OpenMode | undefined;
+        })
+    | BufferEncoding
+    | null,
+): Promise<string | Buffer>;
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
@@ -290,6 +317,10 @@ export class Path {
   async rm_rf(options?: Parameters<typeof rm>[1]): Promise<void> {
     await this.rm({ recursive: true, force: true, ...(options ?? {}) });
   }
+
+  read: typeof readFileType = (options) =>
+    // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
+    readFile(this.#path, options as any) as any;
 
   async readText(): Promise<string> {
     return readFile(this.#path, "utf-8");
