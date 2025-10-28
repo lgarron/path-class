@@ -12,6 +12,10 @@ test("constructor", async () => {
   expect(new Path("trailing/slash/").path).toEqual("trailing/slash/");
 });
 
+test("Path.resolve(…)", async () => {
+  expect(Path.resolve("foo", new Path("/bar/baz")).path).toEqual("/bar/foo");
+});
+
 test("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");

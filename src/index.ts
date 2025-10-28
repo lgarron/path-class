@@ -12,7 +12,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { xdgCache, xdgConfig, xdgData, xdgState } from "xdg-basedir";
 
 // Modifying the type of `readdir(…)` from `node:fs/promises` to remove the
@@ -67,23 +67,52 @@ export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
   #path: string;
   constructor(path: string | URL | Path) {
+    this.#setNormalizedPath(Path.#pathlikeToString(path));
+  }
+
+  /**
+   * Similar to `new URL(path, base)`, but accepting and returning `Path` objects.
+   * Note that `base` must be one of:
+   *
+   * - a `string` representing an absolute path,
+   * - a `URL` object, or
+   * - a `Path` representing an absolute path.
+   *
+   */
+  static resolve(path: string | URL | Path, base: string | URL | Path): Path {
+    const baseURL = (() => {
+      if (!(base instanceof Path)) {
+        return base;
+      }
+      if (!base.#isAbsolutePath()) {
+        throw new Error(
+          "The `base` arg to `Path.resolve(…)` must be an absolute path.",
+        );
+      }
+      return pathToFileURL(base.#path);
+    })();
+    return new Path(new URL(Path.#pathlikeToString(path), baseURL));
+  }
+
+  static #pathlikeToString(path: string | URL | Path): string {
     if (path instanceof Path) {
-      this.#setNormalizedPath(path.#path);
-      return;
+      return path.#path;
     }
     if (path instanceof URL) {
-      this.#setNormalizedPath(fileURLToPath(path));
-      return;
+      return fileURLToPath(path);
     }
     if (typeof path === "string") {
-      this.#setNormalizedPath(path);
-      return;
+      return path;
     }
     throw new Error("Invalid path");
   }
 
   #setNormalizedPath(path: string): void {
     this.#path = join(path);
+  }
+
+  #isAbsolutePath(): boolean {
+    return this.#path.startsWith("/");
   }
 
   /**
