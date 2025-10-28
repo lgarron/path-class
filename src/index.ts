@@ -84,7 +84,7 @@ export class Path {
       if (!(base instanceof Path)) {
         return base;
       }
-      if (!base.#isAbsolutePath()) {
+      if (!base.isAbsolutePath()) {
         throw new Error(
           "The `base` arg to `Path.resolve(…)` must be an absolute path.",
         );
@@ -111,7 +111,7 @@ export class Path {
     this.#path = join(path);
   }
 
-  #isAbsolutePath(): boolean {
+  isAbsolutePath(): boolean {
     return this.#path.startsWith("/");
   }
 
