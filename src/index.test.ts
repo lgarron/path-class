@@ -1,7 +1,7 @@
 import { expect, spyOn, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { Path } from ".";
+import { Path, stringifyIfPath } from ".";
 
 test("constructor", async () => {
   expect(new Path("foo").path).toEqual("foo");
@@ -315,4 +315,10 @@ const spy = spyOn(console, "log");
 test("debugPrint", async () => {
   Path.homedir.debugPrint("foo");
   expect(spy.mock.calls).toEqual([["foo"], ["/mock/home/dir"]]);
+});
+
+test(".stringifyIfPath(…)", async () => {
+  expect(stringifyIfPath(Path.homedir)).toBe("/mock/home/dir");
+  expect(stringifyIfPath("/mock/home/dir")).toBe("/mock/home/dir");
+  expect(stringifyIfPath(4)).toBe(4);
 });
