@@ -63,7 +63,7 @@ test("normalize", async () => {
   expect(new Path("//absolute////bar").path).toEqual("/absolute/bar");
 });
 
-test("join", async () => {
+test(".join(…)", async () => {
   expect(new Path("foo").join("bar").path).toEqual("foo/bar");
   expect(new Path("foo/bar").join("bath", "kitchen/sink").path).toEqual(
     "foo/bar/bath/kitchen/sink",
@@ -161,14 +161,14 @@ test(".existsAsDir()", async () => {
   expect(await filePath.existsAsDir()).toBe(false);
 });
 
-test("mkdir (un-nested)", async () => {
+test(".mkdir(…) (un-nested)", async () => {
   const dir = (await Path.makeTempDir()).join("mkdir-test");
   expect(await dir.exists()).toBe(false);
   await dir.mkdir();
   expect(await dir.exists()).toBe(true);
 });
 
-test("mkdir (nested)", async () => {
+test(".mkdir(…) (nested)", async () => {
   const dir = (await Path.makeTempDir()).join("mkdir-test/nested");
   expect(await dir.exists()).toBe(false);
   expect(() => dir.mkdir({ recursive: false })).toThrow("no such file");
@@ -176,7 +176,7 @@ test("mkdir (nested)", async () => {
   expect(await dir.exists()).toBe(true);
 });
 
-test(".rename()", async () => {
+test(".rename(…)", async () => {
   const parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
@@ -201,7 +201,7 @@ test(".makeTempDir(…)", async () => {
   expect(tempDir2.basename.path).toStartWith("foo");
 });
 
-test("rm (file)", async () => {
+test(".rm(…) (file)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("");
   expect(await file.existsAsFile()).toBe(true);
@@ -211,7 +211,7 @@ test("rm (file)", async () => {
   expect(async () => file.rm()).toThrowError(/ENOENT/);
 });
 
-test("rm (folder)", async () => {
+test(".rm(…) (folder)", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.txt");
   await file.write("");
@@ -223,7 +223,7 @@ test("rm (folder)", async () => {
   expect(async () => tempDir.rm()).toThrowError(/ENOENT/);
 });
 
-test("rm_rf (file)", async () => {
+test(".rm_rf(…) (file)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("");
   expect(await file.existsAsFile()).toBe(true);
@@ -234,7 +234,7 @@ test("rm_rf (file)", async () => {
   expect(await file.existsAsFile()).toBe(false);
 });
 
-test("rm_rf (folder)", async () => {
+test(".rm_rf(…) (folder)", async () => {
   const tempDir = await Path.makeTempDir();
   await tempDir.join("file.txt").write("");
   expect(tempDir.path).toContain("/js-temp-");
@@ -245,7 +245,7 @@ test("rm_rf (folder)", async () => {
   expect(await tempDir.exists()).toBe(false);
 });
 
-test(".fileText()", async () => {
+test(".readText()", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("hi");
   await file.write("bye");
@@ -254,7 +254,7 @@ test(".fileText()", async () => {
   expect(await readFile(file.path, "utf-8")).toBe("bye");
 });
 
-test(".fileJSON()", async () => {
+test(".readJSON()", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   await file.write(JSON.stringify({ foo: "bar" }));
 
@@ -299,11 +299,11 @@ test(".readDir(…)", async () => {
   // const contentsAsEntries = await dir.readDir({ withFileTypes: true });
 });
 
-test("homedir", async () => {
+test(".homedir", async () => {
   expect(Path.homedir.path).toEqual("/mock/home/dir");
 });
 
-test("XDG", async () => {
+test(".xdg", async () => {
   expect(Path.xdg.cache.path).toEqual("/mock/home/dir/.cache");
   expect(Path.xdg.config.path).toEqual("/xdg/config");
   expect(Path.xdg.data.path).toEqual("/mock/home/dir/.local/share");
@@ -312,7 +312,7 @@ test("XDG", async () => {
 
 const spy = spyOn(console, "log");
 
-test("debugPrint", async () => {
+test(".debugPrint(…)", async () => {
   Path.homedir.debugPrint("foo");
   expect(spy.mock.calls).toEqual([["foo"], ["/mock/home/dir"]]);
 });
