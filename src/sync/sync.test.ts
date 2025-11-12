@@ -184,8 +184,7 @@ test(".readDirSync(…)", () => {
   expect(new Set(contentsAsStrings)).toEqual(new Set(["file.txt", "dir"]));
 
   const contentsAsEntries = dir.readDirSync({ withFileTypes: true });
-  expect(contentsAsEntries.map((entry) => entry.name)).toEqual([
-    "file.txt",
-    "dir",
-  ]);
+  expect(new Set(contentsAsEntries.map((entry) => entry.name))).toEqual(
+    new Set(["file.txt", "dir"]),
+  );
 });
