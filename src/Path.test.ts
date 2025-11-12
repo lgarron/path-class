@@ -176,6 +176,20 @@ test(".mkdir(…) (nested)", async () => {
   expect(await dir.exists()).toBe(true);
 });
 
+test(".cp(…)", async () => {
+  const parentDir = await Path.makeTempDir();
+  const file1 = parentDir.join("file1.txt");
+  const file2 = parentDir.join("file2.txt");
+
+  await file1.write("hello world");
+  expect(await file1.exists()).toBe(true);
+  expect(await file2.exists()).toBe(false);
+
+  await file1.cp(file2);
+  expect(await file1.exists()).toBe(true);
+  expect(await file2.exists()).toBe(true);
+});
+
 test(".rename(…)", async () => {
   const parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
@@ -296,7 +310,11 @@ test(".readDir(…)", async () => {
   const contentsAsStrings = await dir.readDir();
   expect(new Set(contentsAsStrings)).toEqual(new Set(["file.txt", "dir"]));
 
-  // const contentsAsEntries = await dir.readDir({ withFileTypes: true });
+  const contentsAsEntries = await dir.readDir({ withFileTypes: true });
+  expect(contentsAsEntries.map((entry) => entry.name)).toEqual([
+    "file.txt",
+    "dir",
+  ]);
 });
 
 test(".homedir", async () => {

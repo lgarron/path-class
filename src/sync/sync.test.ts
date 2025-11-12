@@ -49,6 +49,20 @@ test(".mkdirSync(…) (nested)", () => {
   expect(dir.existsSync()).toBe(true);
 });
 
+test(".cpSync(…)", () => {
+  const parentDir = Path.makeTempDirSync();
+  const file1 = parentDir.join("file1.txt");
+  const file2 = parentDir.join("file2.txt");
+
+  file1.writeSync("hello world");
+  expect(file1.existsSync()).toBe(true);
+  expect(file2.existsSync()).toBe(false);
+
+  file1.cpSync(file2);
+  expect(file1.existsSync()).toBe(true);
+  expect(file2.existsSync()).toBe(true);
+});
+
 test(".renameSync(…)", () => {
   const parentDir = Path.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
@@ -169,5 +183,9 @@ test(".readDirSync(…)", () => {
   const contentsAsStrings = dir.readDirSync();
   expect(new Set(contentsAsStrings)).toEqual(new Set(["file.txt", "dir"]));
 
-  // const contentsAsEntries = dir.readDirSync({ withFileTypes: true });
+  const contentsAsEntries = dir.readDirSync({ withFileTypes: true });
+  expect(contentsAsEntries.map((entry) => entry.name)).toEqual([
+    "file.txt",
+    "dir",
+  ]);
 });
