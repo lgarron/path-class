@@ -1,0 +1,235 @@
+import {
+  cpSync,
+  type Dirent,
+  mkdirSync,
+  type ObjectEncodingOptions,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { mustNotHaveTrailingSlash, Path } from "../Path";
+import "./static";
+
+// Note that (non-static) functions in this file are defined using `function(…)
+// { … }` rather than arrow functions, specifically because we want `this` to
+// operate on the `Path` instance.
+
+declare function readFileSyncType(
+  options?: {
+    encoding?: null | undefined;
+    flag?: string | undefined;
+  } | null,
+): NonSharedBuffer;
+declare function readFileSyncType(
+  options:
+    | {
+        encoding: BufferEncoding;
+        flag?: string | undefined;
+      }
+    | BufferEncoding,
+): string;
+declare function readFileSyncType(
+  options?:
+    | (ObjectEncodingOptions & {
+        flag?: string | undefined;
+      })
+    | BufferEncoding
+    | null,
+): string | NonSharedBuffer;
+
+declare function readDirSyncType(
+  options?:
+    | {
+        encoding: BufferEncoding | null;
+        withFileTypes?: false | undefined;
+        recursive?: boolean | undefined;
+      }
+    | BufferEncoding
+    | null,
+): string[];
+declare function readDirSyncType(
+  options:
+    | {
+        encoding: "buffer";
+        withFileTypes?: false | undefined;
+        recursive?: boolean | undefined;
+      }
+    | "buffer",
+): Buffer[];
+declare function readDirSyncType(
+  options?:
+    | (ObjectEncodingOptions & {
+        withFileTypes?: false | undefined;
+        recursive?: boolean | undefined;
+      })
+    | BufferEncoding
+    | null,
+): string[] | Buffer[];
+declare function readDirSyncType(
+  options: ObjectEncodingOptions & {
+    withFileTypes: true;
+    recursive?: boolean | undefined;
+  },
+): Dirent[];
+declare function readDirSyncType(options: {
+  encoding: "buffer";
+  withFileTypes: true;
+  recursive?: boolean | undefined;
+}): Dirent<Buffer>[];
+
+declare module "../Path" {
+  interface Path {
+    existsSync(constraints?: { mustBe: "file" | "directory" }): boolean;
+    existsAsFileSync(): boolean;
+    existsAsDirSync(): boolean;
+
+    mkdirSync(options?: Parameters<typeof mkdirSync>[1]): Path;
+    cpSync(
+      destination: string | URL | Path,
+      options?: Parameters<typeof cpSync>[2],
+    ): Path;
+    renameSync(destination: string | URL | Path): void;
+
+    rmSync(options?: Parameters<typeof rmSync>[1]): void;
+    rm_rfSync(options?: Parameters<typeof rmSync>[1]): void;
+
+    readSync: typeof readFileSyncType;
+    readTextSync(): string;
+    readJSONSync<T>(): T;
+
+    writeSync(
+      data: Parameters<typeof writeFileSync>[1],
+      options?: Parameters<typeof writeFileSync>[2] | undefined,
+    ): Path;
+    writeJSONSync<T>(
+      data: T,
+      replacer?: Parameters<typeof JSON.stringify>[1],
+      space?: Parameters<typeof JSON.stringify>[2],
+    ): Path;
+
+    readDirSync: typeof readDirSyncType;
+  }
+}
+
+// TODO: find a neat way to dedup with the async version?
+Path.prototype.existsSync = function (constraints?: {
+  mustBe: "file" | "directory";
+}): boolean {
+  let stats: ReturnType<typeof statSync>;
+  try {
+    stats = statSync(this.path);
+    // biome-ignore lint/suspicious/noExplicitAny: TypeScript limitation
+  } catch (e: any) {
+    if (e.code === "ENOENT") {
+      return false;
+    }
+    throw e;
+  }
+  if (!constraints?.mustBe) {
+    return true;
+  }
+  switch (constraints?.mustBe) {
+    case "file": {
+      mustNotHaveTrailingSlash(this);
+      if (stats.isFile()) {
+        return true;
+      }
+      throw new Error(`Path exists but is not a file: ${this.path}`);
+    }
+    case "directory": {
+      if (stats.isDirectory()) {
+        return true;
+      }
+      throw new Error(`Path exists but is not a directory: ${this.path}`);
+    }
+    default: {
+      throw new Error("Invalid path type constraint");
+    }
+  }
+};
+
+Path.prototype.existsAsFileSync = function (): boolean {
+  return this.existsSync({ mustBe: "file" });
+};
+
+Path.prototype.existsAsDirSync = function (): boolean {
+  return this.existsSync({ mustBe: "directory" });
+};
+
+Path.prototype.mkdirSync = function (
+  options?: Parameters<typeof mkdirSync>[1],
+): Path {
+  const optionsObject = (() => {
+    if (typeof options === "string" || typeof options === "number") {
+      return { mode: options };
+    }
+    return options ?? {};
+  })();
+  mkdirSync(this.path, { recursive: true, ...optionsObject });
+  return this;
+};
+
+Path.prototype.cpSync = function (
+  destination: string | URL | Path,
+  options?: Parameters<typeof cpSync>[2],
+): Path {
+  cpSync(this.path, new Path(destination).path, options);
+  return new Path(destination);
+};
+
+Path.prototype.renameSync = function (destination: string | URL | Path): void {
+  renameSync(this.path, new Path(destination).path);
+};
+
+Path.prototype.rmSync = function (
+  options?: Parameters<typeof rmSync>[1],
+): void {
+  rmSync(this.path, options);
+};
+
+Path.prototype.rm_rfSync = function (
+  options?: Parameters<typeof rmSync>[1],
+): void {
+  this.rmSync({ recursive: true, force: true, ...(options ?? {}) });
+};
+
+Path.prototype.readSync = function () {
+  /** @ts-expect-error ts(2683) */
+  return readFileSync(this.path);
+} as typeof readFileSyncType;
+
+Path.prototype.readTextSync = function (): string {
+  return readFileSync(this.path, "utf-8");
+};
+
+Path.prototype.readJSONSync = function <T>(): T {
+  return JSON.parse(this.readTextSync());
+};
+
+Path.prototype.writeSync = function (
+  data: Parameters<typeof writeFileSync>[1],
+  options?: Parameters<typeof writeFileSync>[2],
+): Path {
+  this.parent.mkdirSync();
+  writeFileSync(this.path, data, options);
+  return this;
+};
+
+Path.prototype.writeJSONSync = function <T>(
+  data: T,
+  replacer: Parameters<typeof JSON.stringify>[1] = null,
+  space: Parameters<typeof JSON.stringify>[2] = "  ",
+): Path {
+  this.parent.mkdirSync();
+  this.writeSync(JSON.stringify(data, replacer, space));
+  return this;
+};
+
+/** @ts-expect-error ts(2322): Wrangle types */
+Path.prototype.readDirSync = function (options) {
+  // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
+  return readdirSync(this.path, options as any);
+};

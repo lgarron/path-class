@@ -4,5 +4,5 @@
   "compilerOptions": {
     "outDir": "./dist/lib/path-class/"
   },
-  "files": ["./src/index.ts"]
+  "files": ["./src/index.ts", "./src/sync/index.ts"]
 }

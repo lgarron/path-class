@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/lib/path-class/index.d.ts",
       "import": "./dist/lib/path-class/index.js"
+    },
+    "./sync": {
+      "types": "./dist/lib/path-class/sync/index.d.ts",
+      "import": "./dist/lib/path-class/sync/index.js"
     }
   },
   "devDependencies": {

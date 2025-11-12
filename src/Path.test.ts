@@ -1,7 +1,7 @@
 import { expect, spyOn, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { Path, stringifyIfPath } from ".";
+import { Path, stringifyIfPath } from "./Path";
 
 test("constructor", async () => {
   expect(new Path("foo").path).toEqual("foo");
@@ -268,14 +268,14 @@ test(".readJSON()", async () => {
 test(".write(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.json");
-  await file.write("foo");
+  expect(await file.write("foo")).toBe(file);
 
   expect(await readFile(join(tempDir.path, "./file.json"), "utf-8")).toEqual(
     "foo",
   );
 
   const file2 = tempDir.join("nested/file2.json");
-  await file2.write("bar");
+  expect(await file2.write("bar")).toBe(file2);
   expect(
     await readFile(join(tempDir.path, "./nested/file2.json"), "utf-8"),
   ).toEqual("bar");
@@ -283,7 +283,7 @@ test(".write(…)", async () => {
 
 test(".writeJSON(…)", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
-  await file.writeJSON({ foo: "bar" });
+  expect(await file.writeJSON({ foo: "bar" })).toBe(file);
 
   expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });

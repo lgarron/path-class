@@ -3,6 +3,6 @@ import { build } from "esbuild";
 
 await build({
   ...es2022Lib(),
-  entryPoints: ["./src/index.ts"],
+  entryPoints: ["./src/index.ts", "./src/sync/index.ts"],
   outdir: "./dist/lib/path-class/",
 });
