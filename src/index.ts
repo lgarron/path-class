@@ -14,7 +14,13 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { xdgCache, xdgConfig, xdgData, xdgState } from "xdg-basedir";
+import {
+  xdgCache,
+  xdgConfig,
+  xdgData,
+  xdgRuntime,
+  xdgState,
+} from "xdg-basedir";
 
 // Modifying the type of `readdir(…)` from `node:fs/promises` to remove the
 // first parameter is difficult, if not impossible. So we give up and duplicate
@@ -394,6 +400,14 @@ export class Path {
     config: new Path(xdgConfig ?? Path.homedir.join(".config")),
     data: new Path(xdgData ?? Path.homedir.join(".local/share")),
     state: new Path(xdgState ?? Path.homedir.join(".local/state")),
+    /**
+     * {@link Path.xdg.runtime} does not have a default value. Consider
+     * {@link Path.xdg.runtimeWithStateFallback} if you need a fallback but do not have a particular fallback in mind.
+     */
+    runtime: xdgRuntime ? new Path(xdgRuntime) : undefined,
+    runtimeWithStateFallback: xdgRuntime
+      ? new Path(xdgRuntime)
+      : new Path(xdgState ?? Path.homedir.join(".local/state")),
   };
 
   /** Chainable function to print the path. Prints the same as:

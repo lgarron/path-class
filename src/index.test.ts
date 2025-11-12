@@ -308,6 +308,10 @@ test(".xdg", async () => {
   expect(Path.xdg.config.path).toEqual("/xdg/config");
   expect(Path.xdg.data.path).toEqual("/mock/home/dir/.local/share");
   expect(Path.xdg.state.path).toEqual("/mock/home/dir/.local/state");
+  expect(Path.xdg.runtime).toBeUndefined();
+  expect(Path.xdg.runtimeWithStateFallback.path).toEqual(
+    "/mock/home/dir/.local/state",
+  );
 });
 
 const spy = spyOn(console, "log");
