@@ -316,6 +316,40 @@ test(".readDir(…)", async () => {
   );
 });
 
+test(".symlink(…)", async () => {
+  const tempDir = await Path.makeTempDir();
+  const source = tempDir.join("foo.txt");
+  const target = tempDir.join("bar.txt");
+  await source.symlink(target);
+  expect(await target.existsAsFile()).toBe(false);
+  expect(() => target.readText()).toThrow(/ENOENT/);
+  await source.write("hello");
+  expect(await target.existsAsFile()).toBe(true);
+  expect(await target.readText()).toEqual("hello");
+});
+
+test(".stat(…)", async () => {
+  const file = (await Path.makeTempDir()).join("foo.txt");
+  await file.write("hello");
+
+  expect((await file.stat()).size).toEqual(5);
+  expect((await file.stat()).size).toBeTypeOf("number");
+  expect((await file.stat({ bigint: true })).size).toBeTypeOf("bigint");
+});
+
+test(".lstat(…)", async () => {
+  const tempDir = await Path.makeTempDir();
+  const source = tempDir.join("foo.txt");
+  const target = tempDir.join("bar.txt");
+  await source.symlink(target);
+  await source.write("hello");
+
+  expect((await source.lstat()).isSymbolicLink()).toBe(false);
+  expect((await target.lstat()).isSymbolicLink()).toBe(true);
+
+  expect(await target.readText()).toEqual("hello");
+});
+
 test(".homedir", async () => {
   expect(Path.homedir.path).toEqual("/mock/home/dir");
 });

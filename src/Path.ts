@@ -1,5 +1,6 @@
 import {
   cp,
+  lstat,
   mkdir,
   mkdtemp,
   readdir,
@@ -7,6 +8,7 @@ import {
   rename,
   rm,
   stat,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
@@ -308,6 +310,31 @@ export class Path {
   readDir: typeof readDirType = (options) =>
     // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
     readdir(this.#path, options as any) as any;
+
+  /** Returns the destination path. */
+  async symlink(
+    target: string | URL | Path,
+    type?: Parameters<typeof symlink>[2],
+  ): Promise<Path> {
+    const targetPath = new Path(target);
+    await symlink(
+      this.path,
+      targetPath.path,
+      type as Exclude<Parameters<typeof symlink>[2], undefined>, // 🤷
+    );
+    return targetPath;
+  }
+
+  stat(options?: Parameters<typeof stat>[1]): ReturnType<typeof stat> {
+    return stat(this.path, options);
+  }
+
+  // I don't think `lstat` is a great name, but it does match the
+  // well-established canonical system call. So in this case we keep the
+  // awkward abbreviation.
+  lstat(options?: Parameters<typeof lstat>[1]): ReturnType<typeof lstat> {
+    return lstat(this.path, options);
+  }
 
   static get homedir(): Path {
     return new Path(homedir());
