@@ -188,3 +188,37 @@ test(".readDirSync(…)", () => {
     new Set(["file.txt", "dir"]),
   );
 });
+
+test(".symlinkSync(…)", () => {
+  const tempDir = Path.makeTempDirSync();
+  const source = tempDir.join("foo.txt");
+  const target = tempDir.join("bar.txt");
+  source.symlinkSync(target);
+  expect(target.existsAsFileSync()).toBe(false);
+  expect(() => target.readText()).toThrow(/ENOENT/);
+  source.writeSync("hello");
+  expect(target.existsAsFileSync()).toBe(true);
+  expect(target.readTextSync()).toEqual("hello");
+});
+
+test(".statSync(…)", () => {
+  const file = Path.makeTempDirSync().join("foo.txt");
+  file.writeSync("hello");
+
+  expect(file.statSync()?.size).toEqual(5);
+  expect(file.statSync()?.size).toBeTypeOf("number");
+  expect(file.statSync({ bigint: true })?.size).toBeTypeOf("bigint");
+});
+
+test(".lstatSync(…)", () => {
+  const tempDir = Path.makeTempDirSync();
+  const source = tempDir.join("foo.txt");
+  const target = tempDir.join("bar.txt");
+  source.symlinkSync(target);
+  source.writeSync("hello");
+
+  expect(source.lstatSync()?.isSymbolicLink()).toBe(false);
+  expect(target.lstatSync()?.isSymbolicLink()).toBe(true);
+
+  expect(target.readTextSync()).toEqual("hello");
+});

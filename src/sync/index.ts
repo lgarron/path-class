@@ -1,11 +1,13 @@
 import {
   cpSync,
+  lstatSync,
   mkdirSync,
   readdirSync,
   readFileSync,
   renameSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { mustNotHaveTrailingSlash, Path } from "../Path";
@@ -47,6 +49,23 @@ declare module "../Path" {
     ): Path;
 
     readDirSync: typeof readDirSyncType;
+
+    /** Returns the destination path. */
+    symlinkSync(
+      target: string | URL | Path,
+      type?: Parameters<typeof symlinkSync>[2],
+    ): Path;
+
+    statSync(
+      options?: Parameters<typeof statSync>[1],
+    ): ReturnType<typeof statSync>;
+
+    // I don't think `lstat` is a great name, but it does match the
+    // well-established canonical system call. So in this case we keep the
+    // awkward abbreviation.
+    lstatSync(
+      options?: Parameters<typeof lstatSync>[1],
+    ): ReturnType<typeof lstatSync>;
   }
 }
 
@@ -168,4 +187,29 @@ Path.prototype.writeJSONSync = function <T>(
 Path.prototype.readDirSync = function (options) {
   // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
   return readdirSync(this.path, options as any);
+};
+
+Path.prototype.symlinkSync = function symlink(
+  target: string | URL | Path,
+  type?: Parameters<typeof symlinkSync>[2],
+): Path {
+  const targetPath = new Path(target);
+  symlinkSync(
+    this.path,
+    targetPath.path,
+    type as Exclude<Parameters<typeof symlinkSync>[2], undefined>, // 🤷
+  );
+  return targetPath;
+};
+
+Path.prototype.statSync = function (
+  options?: Parameters<typeof statSync>[1],
+): ReturnType<typeof statSync> {
+  return statSync(this.path, options);
+};
+
+Path.prototype.lstatSync = function (
+  options?: Parameters<typeof lstatSync>[1],
+): ReturnType<typeof lstatSync> {
+  return lstatSync(this.path, options);
 };
