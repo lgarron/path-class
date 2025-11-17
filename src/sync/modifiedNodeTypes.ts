@@ -1,6 +1,12 @@
 // Note: this file is `.ts` rather than `.d.ts` to ensure it ends up in the `tsc` output.
 
-import type { Dirent, ObjectEncodingOptions } from "node:fs";
+import type {
+  BigIntStats,
+  Dirent,
+  ObjectEncodingOptions,
+  StatSyncOptions,
+  Stats,
+} from "node:fs";
 
 export declare function readFileSyncType(
   options?: {
@@ -64,3 +70,38 @@ export declare function readDirSyncType(options: {
   withFileTypes: true;
   recursive?: boolean | undefined;
 }): Dirent<Buffer>[];
+
+export declare function statSyncType(options?: undefined): Stats;
+export declare function statSyncType(
+  options?: StatSyncOptions & {
+    bigint?: false | undefined;
+    throwIfNoEntry: false;
+  },
+): Stats | undefined;
+export declare function statSyncType(
+  options: StatSyncOptions & {
+    bigint: true;
+    throwIfNoEntry: false;
+  },
+): BigIntStats | undefined;
+export declare function statSyncType(
+  options?: StatSyncOptions & {
+    bigint?: false | undefined;
+  },
+): Stats;
+export declare function statSyncType(
+  options: StatSyncOptions & {
+    bigint: true;
+  },
+): BigIntStats;
+export declare function statSyncType(
+  options: StatSyncOptions & {
+    bigint: boolean;
+    throwIfNoEntry?: false | undefined;
+  },
+): Stats | BigIntStats;
+export declare function statSyncType(
+  options?: StatSyncOptions,
+): Stats | BigIntStats | undefined;
+
+export declare const lstatSyncType: typeof statSyncType;

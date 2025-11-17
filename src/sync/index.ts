@@ -12,7 +12,12 @@ import {
 } from "node:fs";
 import { mustNotHaveTrailingSlash, Path } from "../Path";
 import "./static";
-import type { readDirSyncType, readFileSyncType } from "./modifiedNodeTypes";
+import type {
+  lstatSyncType,
+  readDirSyncType,
+  readFileSyncType,
+  statSyncType,
+} from "./modifiedNodeTypes";
 
 // Note that (non-static) functions in this file are defined using `function(…)
 // { … }` rather than arrow functions, specifically because we want `this` to
@@ -56,16 +61,8 @@ declare module "../Path" {
       type?: Parameters<typeof symlinkSync>[2],
     ): Path;
 
-    statSync(
-      options?: Parameters<typeof statSync>[1],
-    ): ReturnType<typeof statSync>;
-
-    // I don't think `lstat` is a great name, but it does match the
-    // well-established canonical system call. So in this case we keep the
-    // awkward abbreviation.
-    lstatSync(
-      options?: Parameters<typeof lstatSync>[1],
-    ): ReturnType<typeof lstatSync>;
+    statSync: typeof statSyncType;
+    lstatSync: typeof lstatSyncType;
   }
 }
 
@@ -202,12 +199,14 @@ Path.prototype.symlinkSync = function symlink(
   return targetPath;
 };
 
+/** @ts-expect-error ts(2322): Wrangle types */
 Path.prototype.statSync = function (
   options?: Parameters<typeof statSync>[1],
 ): ReturnType<typeof statSync> {
   return statSync(this.path, options);
 };
 
+/** @ts-expect-error ts(2322): Wrangle types */
 Path.prototype.lstatSync = function (
   options?: Parameters<typeof lstatSync>[1],
 ): ReturnType<typeof lstatSync> {

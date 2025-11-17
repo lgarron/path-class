@@ -1,7 +1,14 @@
 // Note: this file is `.ts` rather than `.d.ts` to ensure it ends up in the `tsc` output.
 
 import type { Abortable } from "node:events";
-import type { Dirent, ObjectEncodingOptions, OpenMode } from "node:fs";
+import type {
+  BigIntStats,
+  Dirent,
+  ObjectEncodingOptions,
+  OpenMode,
+  StatOptions,
+  Stats,
+} from "node:fs";
 
 // Modifying the type of `readdir(…)` from `node:fs/promises` to remove the
 // first parameter is difficult, if not impossible. So we give up and duplicate
@@ -76,3 +83,34 @@ export declare function readFileType(
     | BufferEncoding
     | null,
 ): Promise<string | Buffer>;
+
+export declare function lstatType(
+  opts?: StatOptions & {
+    bigint?: false | undefined;
+  },
+): Promise<Stats>;
+export declare function lstatType(
+  opts: StatOptions & {
+    bigint: true;
+  },
+): Promise<BigIntStats>;
+export declare function lstatType(
+  opts?: StatOptions,
+): Promise<Stats | BigIntStats>;
+/**
+ * @since v10.0.0
+ * @return Fulfills with the {fs.Stats} object for the given `path`.
+ */
+export declare function statType(
+  opts?: StatOptions & {
+    bigint?: false | undefined;
+  },
+): Promise<Stats>;
+export declare function statType(
+  opts: StatOptions & {
+    bigint: true;
+  },
+): Promise<BigIntStats>;
+export declare function statType(
+  opts?: StatOptions,
+): Promise<Stats | BigIntStats>;

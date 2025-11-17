@@ -21,7 +21,16 @@ import {
   xdgRuntime,
   xdgState,
 } from "xdg-basedir";
-import type { readDirType, readFileType } from "./modifiedNodeTypes";
+import type {
+  lstatType,
+  readDirType,
+  readFileType,
+  statType,
+} from "./modifiedNodeTypes";
+
+// Note that (non-static) functions in this file are defined using `function(…)
+// { … }` rather than arrow functions, specifically because we want `this` to
+// operate on the `Path` instance.
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
@@ -325,16 +334,15 @@ export class Path {
     return targetPath;
   }
 
-  stat(options?: Parameters<typeof stat>[1]): ReturnType<typeof stat> {
-    return stat(this.path, options);
-  }
+  // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
+  stat: typeof statType = (...options) => stat(this.#path, ...options) as any;
 
   // I don't think `lstat` is a great name, but it does match the
   // well-established canonical system call. So in this case we keep the
   // awkward abbreviation.
-  lstat(options?: Parameters<typeof lstat>[1]): ReturnType<typeof lstat> {
-    return lstat(this.path, options);
-  }
+  lstat: typeof lstatType = (...options) =>
+    // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
+    lstat(this.#path, ...options) as any;
 
   static get homedir(): Path {
     return new Path(homedir());
