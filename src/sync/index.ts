@@ -1,8 +1,6 @@
 import {
   cpSync,
-  type Dirent,
   mkdirSync,
-  type ObjectEncodingOptions,
   readdirSync,
   readFileSync,
   renameSync,
@@ -12,73 +10,11 @@ import {
 } from "node:fs";
 import { mustNotHaveTrailingSlash, Path } from "../Path";
 import "./static";
+import type { readDirSyncType, readFileSyncType } from "./modifiedNodeTypes";
 
 // Note that (non-static) functions in this file are defined using `function(…)
 // { … }` rather than arrow functions, specifically because we want `this` to
 // operate on the `Path` instance.
-
-declare function readFileSyncType(
-  options?: {
-    encoding?: null | undefined;
-    flag?: string | undefined;
-  } | null,
-): NonSharedBuffer;
-declare function readFileSyncType(
-  options:
-    | {
-        encoding: BufferEncoding;
-        flag?: string | undefined;
-      }
-    | BufferEncoding,
-): string;
-declare function readFileSyncType(
-  options?:
-    | (ObjectEncodingOptions & {
-        flag?: string | undefined;
-      })
-    | BufferEncoding
-    | null,
-): string | NonSharedBuffer;
-
-declare function readDirSyncType(
-  options?:
-    | {
-        encoding: BufferEncoding | null;
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      }
-    | BufferEncoding
-    | null,
-): string[];
-declare function readDirSyncType(
-  options:
-    | {
-        encoding: "buffer";
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      }
-    | "buffer",
-): Buffer[];
-declare function readDirSyncType(
-  options?:
-    | (ObjectEncodingOptions & {
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      })
-    | BufferEncoding
-    | null,
-): string[] | Buffer[];
-declare function readDirSyncType(
-  options: ObjectEncodingOptions & {
-    withFileTypes: true;
-    recursive?: boolean | undefined;
-  },
-): Dirent[];
-declare function readDirSyncType(options: {
-  encoding: "buffer";
-  withFileTypes: true;
-  recursive?: boolean | undefined;
-}): Dirent<Buffer>[];
 
 declare module "../Path" {
   interface Path {

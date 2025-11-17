@@ -1,5 +1,3 @@
-import type { Abortable } from "node:events";
-import type { Dirent, ObjectEncodingOptions, OpenMode } from "node:fs";
 import {
   cp,
   mkdir,
@@ -21,80 +19,7 @@ import {
   xdgRuntime,
   xdgState,
 } from "xdg-basedir";
-
-// Modifying the type of `readdir(…)` from `node:fs/promises` to remove the
-// first parameter is difficult, if not impossible. So we give up and duplicate
-// the types manually. This ensures ergonomic types, such as an inferred return
-// type of `string[]` when `options` is not passed.
-
-declare function readDirType(
-  options?:
-    | (ObjectEncodingOptions & {
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      })
-    | BufferEncoding
-    | null,
-): Promise<string[]>;
-
-declare function readDirType(
-  options:
-    | {
-        encoding: "buffer";
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      }
-    | "buffer",
-): Promise<Buffer[]>;
-
-declare function readDirType(
-  options?:
-    | (ObjectEncodingOptions & {
-        withFileTypes?: false | undefined;
-        recursive?: boolean | undefined;
-      })
-    | BufferEncoding
-    | null,
-): Promise<string[] | Buffer[]>;
-
-declare function readDirType(
-  options: ObjectEncodingOptions & {
-    withFileTypes: true;
-    recursive?: boolean | undefined;
-  },
-): Promise<Dirent[]>;
-
-declare function readDirType(options: {
-  encoding: "buffer";
-  withFileTypes: true;
-  recursive?: boolean | undefined;
-}): Promise<Dirent<Buffer>[]>;
-
-declare function readFileType(
-  options?:
-    | ({
-        encoding?: null | undefined;
-        flag?: OpenMode | undefined;
-      } & Abortable)
-    | null,
-): Promise<Buffer>;
-declare function readFileType(
-  options:
-    | ({
-        encoding: BufferEncoding;
-        flag?: OpenMode | undefined;
-      } & Abortable)
-    | BufferEncoding,
-): Promise<string>;
-declare function readFileType(
-  options?:
-    | (ObjectEncodingOptions &
-        Abortable & {
-          flag?: OpenMode | undefined;
-        })
-    | BufferEncoding
-    | null,
-): Promise<string | Buffer>;
+import type { readDirType, readFileType } from "./modifiedNodeTypes";
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
