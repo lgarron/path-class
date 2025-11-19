@@ -22,9 +22,12 @@ const distDir = Path.resolve("../dist", import.meta.url);
 console.log(`Building to: ${distDir}`);
 
 // Get XDG dirs, read JSON
-const configPath = Path.xdg.config.join("my-tool/config.json");
-const config: { foo?: number } = await configPath.readJSON({ fallback: {} });
-console.log(config);
+const configPath = Path.xdg.data.join("my-tool/stats.json");
+const config: { counter: number } = await configPath.readJSON({
+  fallback: { counter: 0 },
+});
+config.counter++;
+await configPath.writeJSON(config);
 
 // Create temp dirs and files
 const tempDir = await Path.makeTempDir();
