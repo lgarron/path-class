@@ -275,6 +275,14 @@ export class Path {
     return readFile(this.#path, "utf-8");
   }
 
+  /**
+   * Reads JSON from the given file and parses it. No validation is performed
+   * (beyond JSON parsing).
+   *
+   * An optional `fallback` value can be specified. It will be used if (and only
+   * if) the file does not exist.
+   *
+   */
   async readJSON<T>(options?: { fallback?: T }): Promise<T> {
     try {
       return JSON.parse(await this.readText());

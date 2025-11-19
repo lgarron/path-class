@@ -280,16 +280,21 @@ test(".readJSON()", async () => {
 });
 
 test(".readJSON(…) with fallback", async () => {
-  const file = (await Path.makeTempDir()).join("file.json");
+  const tempDir = await Path.makeTempDir();
+  const file = tempDir.join("file.json");
   const json: { foo?: number } = await file.readJSON({ fallback: { foo: 4 } });
   expect(json).toEqual({ foo: 4 });
 
-  const file2 = (await Path.makeTempDir()).join("file2.json");
+  const file2 = tempDir.join("file2.json");
   await file2.writeJSON({ foo: 6 });
   const json2: { foo?: number } = await file2.readJSON({
     fallback: { foo: 4 },
   });
   expect(json2).toEqual({ foo: 6 });
+
+  expect(() => tempDir.readJSON({ fallback: { foo: 4 } })).toThrowError(
+    /^EISDIR/,
+  );
 });
 
 test(".write(…)", async () => {

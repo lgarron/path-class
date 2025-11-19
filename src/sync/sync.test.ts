@@ -153,16 +153,21 @@ test(".readJSONSync()", () => {
 });
 
 test(".readJSONSync(…) with fallback", () => {
-  const file = Path.makeTempDirSync().join("file.json");
+  const tempDir = Path.makeTempDirSync();
+  const file = tempDir.join("file.json");
   const json: { foo?: number } = file.readJSONSync({ fallback: { foo: 4 } });
   expect(json).toEqual({ foo: 4 });
 
-  const file2 = Path.makeTempDirSync().join("file2.json");
+  const file2 = tempDir.join("file2.json");
   file2.writeJSONSync({ foo: 6 });
   const json2: { foo?: number } = file2.readJSONSync({
     fallback: { foo: 4 },
   });
   expect(json2).toEqual({ foo: 6 });
+
+  expect(() => tempDir.readJSONSync({ fallback: { foo: 4 } })).toThrowError(
+    /^EISDIR/,
+  );
 });
 
 test(".writeSync(…)", () => {
