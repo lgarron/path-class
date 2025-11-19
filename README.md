@@ -23,9 +23,7 @@ console.log(`Building to: ${distDir}`);
 
 // Get XDG dirs, read JSON
 const configPath = Path.xdg.config.join("my-tool/config.json");
-const config: { foo?: number } = (await configPath.existsAsFile())
-  ? await configPath.readJSON()
-  : {};
+const config: { foo?: number } = await configPath.readJSON({ fallback: {} });
 console.log(config);
 
 // Create temp dirs and files

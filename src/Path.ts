@@ -275,8 +275,19 @@ export class Path {
     return readFile(this.#path, "utf-8");
   }
 
-  async readJSON<T>(): Promise<T> {
-    return JSON.parse(await this.readText());
+  async readJSON<T>(options?: { fallback?: T }): Promise<T> {
+    try {
+      return JSON.parse(await this.readText());
+    } catch (e) {
+      if (
+        (e as { code?: string }).code === "ENOENT" &&
+        options &&
+        "fallback" in options
+      ) {
+        return options.fallback as T;
+      }
+      throw e;
+    }
   }
 
   /** Creates intermediate directories if they do not exist.

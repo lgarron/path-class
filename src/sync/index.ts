@@ -41,7 +41,7 @@ declare module "../Path" {
 
     readSync: typeof readFileSyncType;
     readTextSync(): string;
-    readJSONSync<T>(): T;
+    readJSONSync<T>(options?: { fallback?: T }): T;
 
     writeSync(
       data: Parameters<typeof writeFileSync>[1],
@@ -157,8 +157,19 @@ Path.prototype.readTextSync = function (): string {
   return readFileSync(this.path, "utf-8");
 };
 
-Path.prototype.readJSONSync = function <T>(): T {
-  return JSON.parse(this.readTextSync());
+Path.prototype.readJSONSync = function <T>(options?: { fallback?: T }): T {
+  try {
+    return JSON.parse(this.readTextSync());
+  } catch (e) {
+    if (
+      (e as { code?: string }).code === "ENOENT" &&
+      options &&
+      "fallback" in options
+    ) {
+      return options.fallback as T;
+    }
+    throw e;
+  }
 };
 
 Path.prototype.writeSync = function (
