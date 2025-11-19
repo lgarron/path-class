@@ -5,6 +5,10 @@
   "type": "module",
   "main": "./dist/lib/path-class/index.js",
   "types": "./dist/lib/path-class/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lgarron/path-class.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/lib/path-class/index.d.ts",
