@@ -24,10 +24,8 @@ console.log(`Building to: ${distDir}`);
 
 // Get XDG dirs, read JSON with fallback, write JSON
 const info = Path.xdg.data.join("my-tool/info.json");
-const config: { counter: number } = await info.readJSON({
-  fallback: { counter: 0 },
-});
-config.counter++;
+const config: { counter?: number } = await info.readJSON({ fallback: {} });
+config.counter = (config.counter ?? 0) + 1;
 await info.writeJSON(config);
 
 // Extensive example: create temp dirs and files, fetch into path, chaining,
