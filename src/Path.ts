@@ -13,6 +13,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
+import { Readable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   xdgCache,
@@ -31,6 +32,20 @@ import type {
 // Note that (non-static) functions in this file are defined using `function(…)
 // { … }` rather than arrow functions, specifically because we want `this` to
 // operate on the `Path` instance.
+
+type WritableData = Parameters<typeof writeFile>[1] | ReadableStream | Response;
+async function wrangleWritableData(
+  data: WritableData | Promise<WritableData>,
+): Promise<Parameters<typeof writeFile>[1]> {
+  data = await data;
+  if (data instanceof Response) {
+    data = data.body ? Readable.fromWeb(data.body) : new Uint8Array(0);
+  }
+  if (data instanceof ReadableStream) {
+    data = Readable.fromWeb(data);
+  }
+  return data;
+}
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
@@ -283,7 +298,9 @@ export class Path {
    * if) the file does not exist.
    *
    */
-  async readJSON<T>(options?: { fallback?: T }): Promise<T> {
+
+  // biome-ignore lint/suspicious/noExplicitAny: Allow a default of `any` to match `JSON.parse(…)`.
+  async readJSON<T = any>(options?: { fallback?: T }): Promise<T> {
     try {
       return JSON.parse(await this.readText());
     } catch (e) {
@@ -303,11 +320,11 @@ export class Path {
    * Returns the original `Path` (for chaining).
    */
   async write(
-    data: Parameters<typeof writeFile>[1],
+    data: WritableData | Promise<WritableData>,
     options?: Parameters<typeof writeFile>[2],
   ): Promise<Path> {
     await this.parent.mkdir();
-    await writeFile(this.#path, data, options);
+    await writeFile(this.#path, await wrangleWritableData(data), options);
     return this;
   }
 
