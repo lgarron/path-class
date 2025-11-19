@@ -41,4 +41,4 @@ reset: clean
 	rm -rf ./node_modules
 
 .PHONY: prepublishOnly
-prepublishOnly: test clean build
+prepublishOnly: lint test clean build
