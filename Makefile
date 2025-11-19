@@ -21,12 +21,12 @@ test:
 lint: setup
 	bun x @biomejs/biome check
 	bun x tsc --project .
-	bun x -- readme-cli-help --fence "ts cli-help" --check-only "cat ./test/example-usage.ts"
+	bun x -- readme-cli-help --fence "ts cli-help" --check-only "bun run -- 'test/example-usage.cli-help.ts'"
 
 .PHONY: format
 format: setup
 	bun x @biomejs/biome check --write
-	bun x -- readme-cli-help --fence "ts cli-help" "cat ./test/example-usage.ts"
+	bun x -- readme-cli-help --fence "ts cli-help" "bun run -- 'test/example-usage.cli-help.ts'"
 
 .PHONY: publish
 publish:

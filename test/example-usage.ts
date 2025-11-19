@@ -1,4 +1,4 @@
-import { Path } from "path-class";
+import { Path } from "../src";
 
 // Traverse files
 console.log(new Path("foo/bar").parent.join("baz.txt").path);
