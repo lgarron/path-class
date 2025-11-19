@@ -97,10 +97,7 @@ export declare function lstatType(
 export declare function lstatType(
   opts?: StatOptions,
 ): Promise<Stats | BigIntStats>;
-/**
- * @since v10.0.0
- * @return Fulfills with the {fs.Stats} object for the given `path`.
- */
+
 export declare function statType(
   opts?: StatOptions & {
     bigint?: false | undefined;
