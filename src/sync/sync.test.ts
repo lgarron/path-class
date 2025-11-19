@@ -141,7 +141,7 @@ test(".readTextSync()", () => {
   expect(readFileSync(file.path, "utf-8")).toBe("bye");
 });
 
-test(".readJSONWync()", () => {
+test(".readJSONSync()", () => {
   const file = Path.makeTempDirSync().join("file.json");
   file.writeSync(JSON.stringify({ foo: "bar" }));
 
