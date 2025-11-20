@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@types/node": "^24.7.1",
-    "readme-cli-help": "^0.1.10",
+    "readme-cli-help": ">=0.3.1",
     "xdg-basedir": "^5.1.0"
   },
   "files": [
