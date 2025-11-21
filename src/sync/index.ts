@@ -1,4 +1,5 @@
 import {
+  appendFileSync,
   cpSync,
   lstatSync,
   mkdirSync,
@@ -42,6 +43,11 @@ declare module "../Path" {
     readSync: typeof readFileSyncType;
     readTextSync(): string;
     readJSONSync<T>(options?: { fallback?: T }): T;
+
+    appendFileSync(
+      data: Parameters<typeof appendFileSync>[1],
+      options?: Parameters<typeof appendFileSync>[2],
+    ): Path;
 
     writeSync(
       data: Parameters<typeof writeFileSync>[1],
@@ -170,6 +176,14 @@ Path.prototype.readJSONSync = function <T>(options?: { fallback?: T }): T {
     }
     throw e;
   }
+};
+
+Path.prototype.appendFileSync = function (
+  data: Parameters<typeof appendFileSync>[1],
+  options?: Parameters<typeof appendFileSync>[2],
+): Path {
+  appendFileSync(this.path, data, options);
+  return this;
 };
 
 Path.prototype.writeSync = function (

@@ -320,6 +320,14 @@ test(".writeJSON(…)", async () => {
   expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
+test(".appendFile(…)", async () => {
+  const file = (await Path.makeTempDir()).join("file.txt");
+  await file.appendFile("test\n");
+  expect(await file.readText()).toEqual("test\n");
+  await file.appendFile("more\n");
+  expect(await file.readText()).toEqual("test\nmore\n");
+});
+
 test(".readDir(…)", async () => {
   const dir = await Path.makeTempDir();
   await dir.join("file.txt").write("hello");

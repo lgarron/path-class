@@ -1,4 +1,5 @@
 import {
+  appendFile,
   cp,
   lstat,
   mkdir,
@@ -313,6 +314,17 @@ export class Path {
       }
       throw e;
     }
+  }
+
+  /**
+   * Returns the original `Path` (for chaining).
+   */
+  async appendFile(
+    data: Parameters<typeof appendFile>[1],
+    options?: Parameters<typeof appendFile>[2],
+  ): Promise<Path> {
+    await appendFile(this.#path, data, options);
+    return this;
   }
 
   /** Creates intermediate directories if they do not exist.

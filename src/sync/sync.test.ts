@@ -193,6 +193,14 @@ test(".writeJSONSync(…)", () => {
   expect(file.readJSONSync()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
+test(".appendFileSync(…)", () => {
+  const file = Path.makeTempDirSync().join("file.txt");
+  file.appendFileSync("test\n");
+  expect(file.readTextSync()).toEqual("test\n");
+  file.appendFileSync("more\n");
+  expect(file.readTextSync()).toEqual("test\nmore\n");
+});
+
 test(".readDirSync(…)", () => {
   const dir = Path.makeTempDirSync();
   dir.join("file.txt").writeSync("hello");
