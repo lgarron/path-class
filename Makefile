@@ -20,8 +20,11 @@ test:
 .PHONY: lint
 lint: setup
 	bun x @biomejs/biome check
-	bun x tsc --project .
 	bun x -- readme-cli-help --fence "ts cli-help" --check-only "bun run -- 'test/example-usage.cli-help.ts'"
+	# There should be no `async`/`await` in the sync code.
+	grep -r "async\|await" ./src/sync/ || true
+	bun run ./script/lint-sync-code.ts
+	bun x tsc --project .
 
 .PHONY: format
 format: setup

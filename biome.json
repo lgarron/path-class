@@ -8,6 +8,9 @@
     "rules": {
       "nursery": {
         "noFloatingPromises": "error"
+      },
+      "performance": {
+        "noNamespaceImport": "error"
       }
     }
   }

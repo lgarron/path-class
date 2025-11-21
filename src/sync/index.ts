@@ -72,7 +72,7 @@ declare module "../Path" {
   }
 }
 
-// TODO: find a neat way to dedup with the async version?
+// TODO: find a neat way to dedup with the async version? // lint-sync-code-expect-error
 Path.prototype.existsSync = function (constraints?: {
   mustBe: "file" | "directory";
 }): boolean {
