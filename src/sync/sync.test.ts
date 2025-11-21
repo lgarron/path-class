@@ -227,6 +227,15 @@ test(".symlinkSync(…)", () => {
   expect(target.readTextSync()).toEqual("hello");
 });
 
+test(".realpathSync(…)", () => {
+  const tempDir = Path.makeTempDirSync();
+  const source = tempDir.join("foo.txt");
+  source.writeSync("hello world!");
+  const target = tempDir.join("bar.txt");
+  source.symlinkSync(target);
+  expect(source.realpathSync().path).toEqual(target.realpathSync().path);
+});
+
 test(".statSync(…)", () => {
   const file = Path.makeTempDirSync().join("foo.txt");
   file.writeSync("hello");

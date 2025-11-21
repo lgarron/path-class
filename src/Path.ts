@@ -6,6 +6,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  realpath,
   rename,
   rm,
   stat,
@@ -380,6 +381,16 @@ export class Path {
       type as Exclude<Parameters<typeof symlink>[2], undefined>, // 🤷
     );
     return targetPath;
+  }
+
+  // I don't think `lstat` is a great name, but it does match the
+  // well-established canonical commandline name. So in this case we keep the
+  // name instead of using `realPath`.
+  //
+  // Note: There are no options in our API, because the only option is an
+  // encoding. We set the encoding to construct the returned `Path`.
+  async realpath(): Promise<Path> {
+    return new Path(await realpath(this.#path, "utf-8"));
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.

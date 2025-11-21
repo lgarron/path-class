@@ -354,6 +354,17 @@ test(".symlink(…)", async () => {
   expect(await target.readText()).toEqual("hello");
 });
 
+test(".realpath(…)", async () => {
+  const tempDir = await Path.makeTempDir();
+  const source = tempDir.join("foo.txt");
+  await source.write("hello world!");
+  const target = tempDir.join("bar.txt");
+  await source.symlink(target);
+  expect((await source.realpath()).path).toEqual(
+    (await target.realpath()).path,
+  );
+});
+
 test(".stat(…)", async () => {
   const file = (await Path.makeTempDir()).join("foo.txt");
   await file.write("hello");

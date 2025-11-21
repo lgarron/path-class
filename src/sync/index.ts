@@ -5,6 +5,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   renameSync,
   rmSync,
   statSync,
@@ -66,6 +67,7 @@ declare module "../Path" {
       target: string | URL | Path,
       type?: Parameters<typeof symlinkSync>[2],
     ): Path;
+    realpathSync(): Path;
 
     statSync: typeof statSyncType;
     lstatSync: typeof lstatSyncType;
@@ -211,7 +213,7 @@ Path.prototype.readDirSync = function (options) {
   return readdirSync(this.path, options as any);
 };
 
-Path.prototype.symlinkSync = function symlink(
+Path.prototype.symlinkSync = function (
   target: string | URL | Path,
   type?: Parameters<typeof symlinkSync>[2],
 ): Path {
@@ -222,6 +224,10 @@ Path.prototype.symlinkSync = function symlink(
     type as Exclude<Parameters<typeof symlinkSync>[2], undefined>, // 🤷
   );
   return targetPath;
+};
+
+Path.prototype.realpathSync = function (): Path {
+  return new Path(realpathSync(this.path));
 };
 
 /** @ts-expect-error ts(2322): Wrangle types */
