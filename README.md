@@ -53,3 +53,8 @@ This implementation differs from similar functions in `node` in a few ways:
 - Async `.exists(…)` is implemented. Go knock yourself out with race conditions.
 - `.exists(…)` has options/variants to ensure the existing path is a dir/file.
 - Supported in packages like [`printable-shell-command`](https://github.com/lgarron/printable-shell-command) and [`lockfile-mutex`](https://github.com/lgarron/lockfile-mutex).
+
+Also note:
+
+- `Path` sometimes uses a the presence of a trailing slash `/` to disallow file-specific operations on directory paths.
+- `Path` preserves relative resolution prefixes like `.` and `..`. For example, `new Path("./@biomejs/biome")` is *not* the same as `new Path("@biomejs/biome")`.
