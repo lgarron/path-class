@@ -504,8 +504,11 @@ test(".xdg", async () => {
 const spy = spyOn(console, "log");
 
 test(".debugPrint(…)", async () => {
-  Path.homedir.debugPrint("foo");
-  expect(spy.mock.calls).toEqual([["foo"], ["/mock/home/dir"]]);
+  Path.homedir.debugPrint("Here is a test log of the mock home directory:");
+  expect(spy.mock.calls).toEqual([
+    ["Here is a test log of the mock home directory:"],
+    ["/mock/home/dir"],
+  ]);
 });
 
 test(".stringifyIfPath(…)", async () => {
