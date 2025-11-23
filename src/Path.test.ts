@@ -1,6 +1,7 @@
 import { expect, spyOn, test } from "bun:test";
-import { readFile } from "node:fs/promises";
+import { readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
+import { chdir } from "node:process";
 import { Path, stringifyIfPath } from "./Path";
 
 test("constructor", async () => {
@@ -507,6 +508,13 @@ test(".lstat(…)", async () => {
 
 test(".homedir", async () => {
   expect(Path.homedir.path).toEqual("/mock/home/dir");
+});
+
+test(".cwd", async () => {
+  expect(Path.cwd.basename.path).toEqual("path-class");
+  const tempDir = await Path.makeTempDir();
+  chdir(tempDir.path);
+  expect(await realpath(Path.cwd.path)).toEqual(await realpath(tempDir.path));
 });
 
 test(".xdg", async () => {

@@ -15,6 +15,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
+import { cwd } from "node:process";
 import { Readable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
@@ -550,6 +551,11 @@ export class Path {
 
   static get homedir(): Path {
     return new Path(homedir());
+  }
+
+  // Note that this computes the `cwd` from fresh every time, in case it has changed for the current process.
+  static get cwd(): Path {
+    return new Path(cwd());
   }
 
   static xdg = {
