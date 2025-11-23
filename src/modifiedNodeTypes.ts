@@ -84,30 +84,18 @@ export declare function readFileType(
     | null,
 ): Promise<string | Buffer>;
 
-export declare function lstatType(
+export declare function statType(
   opts?: StatOptions & {
     bigint?: false | undefined;
   },
 ): Promise<Stats>;
-export declare function lstatType(
+export declare function statType(
   opts: StatOptions & {
     bigint: true;
   },
 ): Promise<BigIntStats>;
-export declare function lstatType(
+export declare function statType(
   opts?: StatOptions,
 ): Promise<Stats | BigIntStats>;
 
-export declare function statType(
-  opts?: StatOptions & {
-    bigint?: false | undefined;
-  },
-): Promise<Stats>;
-export declare function statType(
-  opts: StatOptions & {
-    bigint: true;
-  },
-): Promise<BigIntStats>;
-export declare function statType(
-  opts?: StatOptions,
-): Promise<Stats | BigIntStats>;
+export declare const lstatType: typeof statType;

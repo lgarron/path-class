@@ -1,9 +1,11 @@
 import {
+  appendFileSync,
   cpSync,
   lstatSync,
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   renameSync,
   rmSync,
   statSync,
@@ -43,6 +45,11 @@ declare module "../Path" {
     readTextSync(): string;
     readJSONSync<T>(options?: { fallback?: T }): T;
 
+    appendFileSync(
+      data: Parameters<typeof appendFileSync>[1],
+      options?: Parameters<typeof appendFileSync>[2],
+    ): Path;
+
     writeSync(
       data: Parameters<typeof writeFileSync>[1],
       options?: Parameters<typeof writeFileSync>[2] | undefined,
@@ -60,13 +67,14 @@ declare module "../Path" {
       target: string | URL | Path,
       type?: Parameters<typeof symlinkSync>[2],
     ): Path;
+    realpathSync(): Path;
 
     statSync: typeof statSyncType;
     lstatSync: typeof lstatSyncType;
   }
 }
 
-// TODO: find a neat way to dedup with the async version?
+// TODO: find a neat way to dedup with the async version? // lint-sync-code-expect-error
 Path.prototype.existsSync = function (constraints?: {
   mustBe: "file" | "directory";
 }): boolean {
@@ -172,6 +180,14 @@ Path.prototype.readJSONSync = function <T>(options?: { fallback?: T }): T {
   }
 };
 
+Path.prototype.appendFileSync = function (
+  data: Parameters<typeof appendFileSync>[1],
+  options?: Parameters<typeof appendFileSync>[2],
+): Path {
+  appendFileSync(this.path, data, options);
+  return this;
+};
+
 Path.prototype.writeSync = function (
   data: Parameters<typeof writeFileSync>[1],
   options?: Parameters<typeof writeFileSync>[2],
@@ -197,7 +213,7 @@ Path.prototype.readDirSync = function (options) {
   return readdirSync(this.path, options as any);
 };
 
-Path.prototype.symlinkSync = function symlink(
+Path.prototype.symlinkSync = function (
   target: string | URL | Path,
   type?: Parameters<typeof symlinkSync>[2],
 ): Path {
@@ -208,6 +224,10 @@ Path.prototype.symlinkSync = function symlink(
     type as Exclude<Parameters<typeof symlinkSync>[2], undefined>, // 🤷
   );
   return targetPath;
+};
+
+Path.prototype.realpathSync = function (): Path {
+  return new Path(realpathSync(this.path));
 };
 
 /** @ts-expect-error ts(2322): Wrangle types */

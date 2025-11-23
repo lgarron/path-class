@@ -193,6 +193,14 @@ test(".writeJSONSync(…)", () => {
   expect(file.readJSONSync()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
+test(".appendFileSync(…)", () => {
+  const file = Path.makeTempDirSync().join("file.txt");
+  file.appendFileSync("test\n");
+  expect(file.readTextSync()).toEqual("test\n");
+  file.appendFileSync("more\n");
+  expect(file.readTextSync()).toEqual("test\nmore\n");
+});
+
 test(".readDirSync(…)", () => {
   const dir = Path.makeTempDirSync();
   dir.join("file.txt").writeSync("hello");
@@ -217,6 +225,15 @@ test(".symlinkSync(…)", () => {
   source.writeSync("hello");
   expect(target.existsAsFileSync()).toBe(true);
   expect(target.readTextSync()).toEqual("hello");
+});
+
+test(".realpathSync(…)", () => {
+  const tempDir = Path.makeTempDirSync();
+  const source = tempDir.join("foo.txt");
+  source.writeSync("hello world!");
+  const target = tempDir.join("bar.txt");
+  source.symlinkSync(target);
+  expect(source.realpathSync().path).toEqual(target.realpathSync().path);
 });
 
 test(".statSync(…)", () => {
