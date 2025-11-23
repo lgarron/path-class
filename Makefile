@@ -13,6 +13,9 @@ build-types: setup
 setup:
 	bun install --frozen-lockfile
 
+.PHONY: check
+check: lint test build
+
 .PHONY: test
 test:
 	bun test
@@ -44,4 +47,4 @@ reset: clean
 	rm -rf ./node_modules
 
 .PHONY: prepublishOnly
-prepublishOnly: lint test clean build
+prepublishOnly: clean check build
