@@ -47,6 +47,23 @@ async function wrangleWritableData(
   return data;
 }
 
+export enum ResolutionPrefix {
+  Absolute = "absolute",
+  Relative = "relative",
+  Bare = "bare",
+}
+
+function resolutionPrefix(pathString: string): ResolutionPrefix {
+  if (pathString.startsWith("/")) {
+    return ResolutionPrefix.Absolute;
+  } else if (pathString.startsWith("./")) {
+    return ResolutionPrefix.Relative;
+  } else if (pathString === ".") {
+    return ResolutionPrefix.Relative;
+  }
+  return ResolutionPrefix.Bare;
+}
+
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
   #path: string;
@@ -54,7 +71,12 @@ export class Path {
    * If `path` is a string starting with `file:///`, it will be parsed as a file URL.
    */
   constructor(path: string | URL | Path) {
-    this.#setNormalizedPath(Path.#pathlikeToString(path));
+    const s = Path.#pathlikeToString(path);
+    this.#setNormalizedPath(s);
+  }
+
+  get resolutionPrefix(): ResolutionPrefix {
+    return resolutionPrefix(this.#path);
   }
 
   /**
@@ -68,6 +90,9 @@ export class Path {
   static resolve(path: string | URL | Path, base: string | URL | Path): Path {
     const baseURL = (() => {
       if (!(base instanceof Path)) {
+        if (typeof base === "string" && !base.startsWith("file://")) {
+          return pathToFileURL(base);
+        }
         return base;
       }
       if (!base.isAbsolutePath()) {
@@ -97,12 +122,18 @@ export class Path {
     throw new Error("Invalid path");
   }
 
+  // Preserves the `ResolutionPrefix` status when possible.
   #setNormalizedPath(path: string): void {
+    const prefix = resolutionPrefix(path);
     this.#path = join(path);
+    if (prefix === ResolutionPrefix.Relative && !this.#path.startsWith(".")) {
+      // We don't have to handle the case of `"."`, as it already starts with `"."`
+      this.#path = `./${this.#path}`;
+    }
   }
 
   isAbsolutePath(): boolean {
-    return this.#path.startsWith("/");
+    return this.resolutionPrefix === ResolutionPrefix.Absolute;
   }
 
   toFileURL(): URL {
@@ -142,10 +173,124 @@ export class Path {
    * This follows `node` semantics for absolute paths: leading slashes in the given descendant segments are ignored.
    */
   join(...segments: (string | Path)[]): Path {
-    const segmentStrings = segments.map((segment) =>
-      segment instanceof Path ? segment.path : segment,
-    );
+    const segmentStrings = segments.map((segment) => {
+      const s = stringifyIfPath(segment);
+      if (resolutionPrefix(s) === ResolutionPrefix.Absolute) {
+        throw new Error(
+          "Arguments to `.join(…)` cannot be absolute. Use `.asRelative()` to convert them first if needed.",
+        );
+      }
+      return s;
+    });
     return new Path(join(this.#path, ...segmentStrings));
+  }
+
+  /**
+   * Adjust the prefix to construct a relative path.
+   *
+   * | Example input   | Output          |
+   * |-----------------|-----------------|
+   * | `"bare"`        | `"./bare"`      |
+   * | `"./relative"`  | `"./relative"`  |
+   * | `"../up-first"` | `"../up-first"` |
+   * | `"/absolute"`   | `"./absolute"`  |
+   *
+   */
+  asRelative(): Path {
+    return new Path(`./${this.#path}`);
+  }
+
+  /**
+   * Adjust the prefix to construct an absolute path.
+   *
+   * | Example input   | Output        |
+   * |-----------------|---------------|
+   * | `"bare"`        | `"/bare"`     |
+   * | `"./relative"`  | `"/relative"` |
+   * | `"../up-first"` | `"/up-first"` |
+   * | `"/absolute"`   | `"/absolute"` |
+   *
+   */
+  asAbsolute(): Path {
+    return new Path(join("/", this.#path));
+  }
+
+  /**
+   * Adjust the prefix to construct a bare path. Note that this returns `"."` if
+   * there are no named paths left.
+   *
+   * | Example input     | Output       |
+   * |-------------------|--------------|
+   * | `"bare"`          | `"bare"`     |
+   * | `"./relative"  `  | `"relative"` |
+   * | `"/absolute"`     | `"absolute"` |
+   * | `"."`             | `"."`        |
+   * | `"down-first/.."` | `"."`        |
+   * | `"../up-first"`   | (error)      |
+   * | `".."`            | (error)      |
+   *
+   * Specify `parentTraversalPrefixHandling` in the `options` if you would like
+   * to strip or keep resolution prefixes like `../` rather than erroring.
+   *
+   * | Example input        | Output with `{ parentTraversalPrefixHandling: "strip" }` |
+   * |----------------------|----------------------------------------------------------|
+   * | `"../up-first"`      | `"up-first"`                                             |
+   * | `".."`               | `"."`                                                    |
+   *
+   * | Example input        | Output with `{ parentTraversalPrefixHandling: "keep" }` |
+   * |----------------------|---------------------------------------------------------|
+   * | `"../up-first"`      | `"../up-first"`                                         |
+   * | `".."`               | `".."`                                                  |
+   *
+   * If you need the output to start with a named component and return values
+   * like `.`, `..`, `../`, or `../…` are not okay, pass
+   * `requireNamedComponentPrefix: true`. This is useful if the path represents
+   * an `npm`-style package name (e.g. `"typescript"`, `"@biomejs/biome"`).
+   *
+   */
+  asBare(options?: {
+    parentTraversalPrefixHandling?: "error" | "strip" | "keep";
+    requireNamedComponentPrefix?: boolean;
+  }): Path {
+    const path = new Path(join(".", this.#path));
+    if (!path.#path.startsWith("../") && path.#path !== "..") {
+      if (
+        options?.requireNamedComponentPrefix &&
+        path.resolutionPrefix === ResolutionPrefix.Relative
+      ) {
+        throw new Error("Output does not start with a named component.");
+      }
+      return path;
+    }
+    const parentTraversalHandling =
+      options?.parentTraversalPrefixHandling ?? "error";
+    switch (parentTraversalHandling) {
+      case "error": {
+        throw new Error(
+          'Converting path to a bare path resulted in a `..` traversal prefix. Pass `"strip"` or `"keep"` as the `parentTraversalHandling` option to avoid an error.',
+        );
+      }
+      case "strip": {
+        let newPath = path.#path.replace(/^(\.\.\/)+/, "");
+        if (["", ".."].includes(newPath)) {
+          newPath = ".";
+        }
+        const output = new Path(newPath);
+        if (
+          options?.requireNamedComponentPrefix &&
+          output.resolutionPrefix === ResolutionPrefix.Relative
+        ) {
+          throw new Error("Output does not start with a named component.");
+        }
+        return new Path(newPath);
+      }
+      case "keep": {
+        if (options?.requireNamedComponentPrefix) {
+          throw new Error("Output does not start with a named component.");
+        }
+        return path;
+      }
+    }
   }
 
   extendBasename(suffix: string): Path {

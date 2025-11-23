@@ -4,12 +4,21 @@ import { join } from "node:path";
 import { Path, stringifyIfPath } from "./Path";
 
 test("constructor", async () => {
-  expect(new Path("foo").path).toEqual("foo");
-  expect(new Path("./relative").path).toEqual("relative");
-  expect(new Path("./relative/nested").path).toEqual("relative/nested");
+  expect(new Path("bare").path).toEqual("bare");
+  expect(new Path("bare/").path).toEqual("bare/");
+  expect(new Path("bare/path").path).toEqual("bare/path");
+  expect(new Path("bare/path/").path).toEqual("bare/path/");
+  expect(new Path("./relative").path).toEqual("./relative");
+  expect(new Path("./relative/").path).toEqual("./relative/");
+  expect(new Path("./relative/nested").path).toEqual("./relative/nested");
+  expect(new Path("./relative/nested/").path).toEqual("./relative/nested/");
   expect(new Path("/absolute").path).toEqual("/absolute");
+  expect(new Path("/absolute/").path).toEqual("/absolute/");
   expect(new Path("/absolute/nested").path).toEqual("/absolute/nested");
-  expect(new Path("trailing/slash/").path).toEqual("trailing/slash/");
+  expect(new Path("/absolute/nested/").path).toEqual("/absolute/nested/");
+  expect(new Path("./down/../again").path).toEqual("./again");
+  expect(new Path("down/../again").path).toEqual("again");
+  expect(new Path("down/..").path).toEqual(".");
 });
 
 test("Path.resolve(…)", async () => {
@@ -50,8 +59,10 @@ test(".hasTrailingSlash()", async () => {
   expect(new Path("foo/bar").hasTrailingSlash()).toBe(false);
   expect(new Path("foo/bar/").hasTrailingSlash()).toBe(true);
   expect(new Path(import.meta.url).hasTrailingSlash()).toBe(false);
-  expect(new Path(import.meta.url).join("/").hasTrailingSlash()).toBe(true);
-  expect(new Path(import.meta.url).join("/.").hasTrailingSlash()).toBe(false);
+  expect(new Path(import.meta.url).join("foo/").hasTrailingSlash()).toBe(true);
+  expect(new Path(import.meta.url).join("bar/.").hasTrailingSlash()).toBe(
+    false,
+  );
   expect(new Path(import.meta.url).join(".").hasTrailingSlash()).toBe(false);
 });
 
@@ -72,7 +83,114 @@ test(".join(…)", async () => {
   expect(
     new Path("foo/bar").join("bath", new Path("kitchen/sink")).path,
   ).toEqual("foo/bar/bath/kitchen/sink");
-  expect(new Path("foo").join(new Path("/bar")).path).toEqual("foo/bar");
+  expect(() => new Path("foo").join(new Path("/bar")).path).toThrow(
+    "Arguments to `.join(…)` cannot be absolute. Use `.asRelative()` to convert them first if needed.",
+  );
+});
+
+test("asRelative()", async () => {
+  // From doc comment
+  expect(new Path("bare").asRelative().path).toEqual("./bare");
+  expect(new Path("./relative").asRelative().path).toEqual("./relative");
+  expect(new Path("../up-first").asRelative().path).toEqual("../up-first");
+  expect(new Path("/absolute").asRelative().path).toEqual("./absolute");
+  // Other
+  expect(new Path("./bar/../foo").asRelative().path).toEqual("./foo");
+  expect(new Path("./bar/../../").asRelative().path).toEqual("../");
+  expect(new Path("././").asRelative().path).toEqual("./");
+  expect(new Path("..").asRelative().path).toEqual("..");
+  expect(new Path("../").asRelative().path).toEqual("../");
+  expect(new Path("/abs/").asRelative().path).toEqual("./abs/");
+  expect(new Path("bare/").asRelative().path).toEqual("./bare/");
+  expect(new Path("./rel/").asRelative().path).toEqual("./rel/");
+  expect(new Path("../up/").asRelative().path).toEqual("../up/");
+});
+
+test("asAbsolute()", async () => {
+  // From doc comment
+  expect(new Path("bare").asAbsolute().path).toEqual("/bare");
+  expect(new Path("./relative").asAbsolute().path).toEqual("/relative");
+  expect(new Path("../up-first").asAbsolute().path).toEqual("/up-first");
+  expect(new Path("/absolute").asAbsolute().path).toEqual("/absolute");
+  // Other
+  expect(new Path("/abs/").asAbsolute().path).toEqual("/abs/");
+  expect(new Path("bare/").asAbsolute().path).toEqual("/bare/");
+  expect(new Path("../up/").asAbsolute().path).toEqual("/up/");
+});
+
+test("asBare(…)", async () => {
+  const ERROR_1 =
+    'Converting path to a bare path resulted in a `..` traversal prefix. Pass `"strip"` or `"keep"` as the `parentTraversalHandling` option to avoid an error.';
+  const ERROR_2 = "Output does not start with a named component.";
+  // From doc comment (default)
+  expect(new Path("bare").asBare().path).toEqual("bare");
+  expect(new Path("./relative").asBare().path).toEqual("relative");
+  expect(new Path(".").asBare().path).toEqual(".");
+  expect(new Path("down-first/..").asBare().path).toEqual(".");
+  expect(() => new Path("../up-first").asBare().path).toThrow(ERROR_1);
+  expect(() => new Path("..").asBare().path).toThrow(ERROR_1);
+  expect(new Path("/absolute").asBare().path).toEqual("absolute");
+  // From doc comment (strip)
+  expect(
+    new Path("../up-first").asBare({ parentTraversalPrefixHandling: "strip" })
+      .path,
+  ).toEqual("up-first");
+  expect(
+    new Path("..").asBare({ parentTraversalPrefixHandling: "strip" }).path,
+  ).toEqual(".");
+  // From doc comment (keep)
+  expect(
+    new Path("../up-first").asBare({ parentTraversalPrefixHandling: "keep" })
+      .path,
+  ).toEqual("../up-first");
+  expect(
+    new Path("..").asBare({ parentTraversalPrefixHandling: "keep" }).path,
+  ).toEqual("..");
+  // Other
+  expect(new Path(".").asBare().asBare().path).toEqual(".");
+  expect(new Path("./").asBare().asBare().path).toEqual("./");
+  expect(new Path("/abs/").asBare().asBare().path).toEqual("abs/");
+  expect(new Path("bare/").asBare().asBare().path).toEqual("bare/");
+  expect(() => new Path("../up/").asBare().path).toThrow(ERROR_1);
+  expect(() => new Path("./down/down/../../..").asBare().path).toThrow(ERROR_1);
+  expect(() => new Path("..").asBare().path).toThrow(ERROR_1);
+  expect(() => new Path("../../up/").asBare().path).toThrow(ERROR_1);
+  // parentTraversalPrefixHandling
+  expect(
+    new Path("../../up/").asBare({ parentTraversalPrefixHandling: "strip" })
+      .path,
+  ).toEqual("up/");
+  expect(
+    new Path("../../up/").asBare({ parentTraversalPrefixHandling: "keep" })
+      .path,
+  ).toEqual("../../up/");
+  expect(
+    new Path("../..").asBare({ parentTraversalPrefixHandling: "strip" }).path,
+  ).toEqual(".");
+  expect(
+    new Path("../../").asBare({ parentTraversalPrefixHandling: "strip" }).path,
+  ).toEqual(".");
+  // requireNamedComponentPrefix
+  expect(
+    () =>
+      new Path(".").asBare({
+        requireNamedComponentPrefix: true,
+      }).path,
+  ).toThrow(ERROR_2);
+  expect(
+    () =>
+      new Path("../../").asBare({
+        parentTraversalPrefixHandling: "strip",
+        requireNamedComponentPrefix: true,
+      }).path,
+  ).toThrow(ERROR_2);
+  expect(
+    () =>
+      new Path("./").asBare({
+        parentTraversalPrefixHandling: "strip",
+        requireNamedComponentPrefix: true,
+      }).path,
+  ).toThrow(ERROR_2);
 });
 
 test("traverse", async () => {
