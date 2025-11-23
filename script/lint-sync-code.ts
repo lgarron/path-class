@@ -5,7 +5,8 @@ import { Path } from "path-class";
 const EXPECTED_NUM_FILES = 4;
 
 const root = Path.resolve("../src/sync", import.meta.url);
-const paths = await root.readDir();
+// TODO: Can we do something like `git ls-tree -r --name-only HEAD src/sync` that also works with `jj`? Should we filter by extension? Should we hardcode to `.ts`?
+const paths = (await root.readDir()).filter((path) => path !== ".DS_Store");
 
 assert.equal(paths.length, EXPECTED_NUM_FILES);
 
