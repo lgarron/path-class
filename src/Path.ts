@@ -574,9 +574,12 @@ export class Path {
     return new Path(homedir());
   }
 
-  // Note that this computes the `cwd` from fresh every time, in case it has changed for the current process.
+  /**
+   * Get the current working directory as a path. Always includes a trailing slash.
+   * Note that this computes the `cwd` from fresh every time, in case it has changed for the current process.
+   */
   static get cwd(): Path {
-    return new Path(cwd());
+    return new Path(cwd()).toggleTrailingSlash(true);
   }
 
   static xdg = {
