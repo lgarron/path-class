@@ -14,7 +14,7 @@
         "@types/bun": "^1.3.0",
         "esbuild": "^0.25.10",
         "printable-shell-command": "^2.6.3",
-        "readme-cli-help": ">=0.4.5",
+        "readme-cli-help": ">=0.4.7",
         "typescript": "^5.9.3",
       },
     },
@@ -118,11 +118,11 @@
 
     "path-class": ["path-class@0.7.2", "", { "dependencies": { "@types/node": "^24.7.1", "xdg-basedir": "^5.1.0" } }, "sha512-vXj1HNmjXZTSPNLaFStTCAIFlMVls9TW44lpI+CFeFbP7vZu7hvQ76ObHABm88NcWrizYQcqqOWeHRnc1TRZtA=="],
 
-    "plural-chain": ["plural-chain@0.2.2", "", { "dependencies": { "readme-cli-help": "^0.4.0" } }, "sha512-xZ3h2cF//BzQUgfhI8nuK4QWphavMCwF1x74LIo1Zk8wS2JAT5JjP26pwGK5RABcQvPqHF/qxWSKciegI11t1Q=="],
+    "plural-chain": ["plural-chain@0.2.3", "", {}, "sha512-iqzW8/mS8+Yveu1mZtoEtdmg0yglWDM7mL1bKzD4H+BlMaGCl/Ig0oTfSy4oEm6A20sgLS0zWaLbgmRemr1bFg=="],
 
     "printable-shell-command": ["printable-shell-command@2.6.3", "", { "dependencies": { "path-class": ">=0.6.1", "type-fest": ">=5.1.0" }, "optionalDependencies": { "@types/bun": "^1.2.20", "@types/node": "^24.2.0" } }, "sha512-u49zQsdil1clG2RKs+PQvoU64FfRXziMi8cTjrL7Cv92q1eYwyNnHM9PAux0qIme2ucWxn3gIYshkXhyS54y5A=="],
 
-    "readme-cli-help": ["readme-cli-help@0.4.5", "", { "dependencies": { "@optique/core": ">=0.7.2", "@optique/run": ">=0.7.2", "ajv": "^8.17.1", "path-class": ">=0.10.3", "plural-chain": ">=0.2.2", "printable-shell-command": "^2.7.3" }, "bin": { "readme-cli-help": "src/main.ts" } }, "sha512-MsOUatUbQ+FCovRIlkJBYA/jseuUa0pehmAtmJHKlAt2r5FRlMA3LfBci6pFI+PpgTyXPsSR3oRageRiSeMhBA=="],
+    "readme-cli-help": ["readme-cli-help@0.4.7", "", { "dependencies": { "@optique/core": ">=0.7.2", "@optique/run": ">=0.7.2", "ajv": "^8.17.1", "path-class": ">=0.10.3", "plural-chain": ">=0.2.3", "printable-shell-command": "^2.7.3" }, "bin": { "readme-cli-help": "src/main.ts" } }, "sha512-GZtKNWry1EFrctsFkq35B7GJG9C+ytfq9M/oyif88gvjcWpWOY5R4jEyu4Gp92sN29dYFbbbalpEbkZvriuXNw=="],
 
     "require-from-string": ["require-from-string@2.0.2", "", {}, "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="],
 
