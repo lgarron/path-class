@@ -27,7 +27,8 @@ lint: setup
 	# There should be no `async`/`await` in the sync code.
 	grep -r "async\|await" ./src/sync/ || true
 	bun run ./script/lint-sync-code.ts
-	bun x tsc --project .
+	bun x tsc --noEmit --project .
+	bun x tsc --noEmit --project ./examples/
 
 .PHONY: format
 format: setup

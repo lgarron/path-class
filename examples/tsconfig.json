@@ -1,7 +1,9 @@
 {
+  "extends": ["../tsconfig.json"],
   "compilerOptions": {
     "paths": {
       "path-class": ["../src/index.ts"]
     }
-  }
+  },
+  "exclude": []
 }

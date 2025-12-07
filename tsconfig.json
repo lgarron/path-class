@@ -1,5 +1,5 @@
 {
   "extends": "./node_modules/@cubing/dev-config/ts/es2022-types/no-dom/tsconfig.json",
   "compilerOptions": { "paths": { "path-class": ["./src/"] } },
-  "exclude": ["./dist"]
+  "exclude": ["./dist/", "./examples/"]
 }
