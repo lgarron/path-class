@@ -1,5 +1,5 @@
+import { Path } from "path-class";
 import { PrintableShellCommand } from "printable-shell-command";
-import { Path } from "../src";
 
 // Traverse files
 console.log(new Path("foo/bar").parent.join("baz.txt").path);
@@ -28,8 +28,14 @@ await info.writeJSON(config);
 // unzip in memory. However, the steps are a good illustration of diverse tasks
 // in a typical script.
 const tempDir = await Path.makeTempDir();
-const zipFile = await tempDir.join("file.zip").write(fetch("https://github.com/lgarron/path-class/archive/refs/tags/v0.7.2.zip"));
+const zipFile = await tempDir
+  .join("file.zip")
+  .write(
+    fetch("https://github.com/lgarron/path-class/archive/refs/tags/v0.7.2.zip"),
+  );
 await new PrintableShellCommand("unzip", [zipFile]).shellOut({ cwd: tempDir });
-const packageJSON = await tempDir.join("path-class-0.7.2/package.json").readJSON();
+const packageJSON = await tempDir
+  .join("path-class-0.7.2/package.json")
+  .readJSON();
 console.log(packageJSON.exports);
 tempDir.rm_rf();

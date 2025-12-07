@@ -4,7 +4,7 @@ A semantic `Path` class for `node` and `bun`. Inspired by `bun`'s [`file(…)`](
 
 ## Usage examples
 
-````ts cli-help
+````ts usage
 import { PrintableShellCommand } from "printable-shell-command";
 import { Path } from "path-class";
 

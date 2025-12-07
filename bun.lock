@@ -14,7 +14,7 @@
         "@types/bun": "^1.3.0",
         "esbuild": "^0.25.10",
         "printable-shell-command": "^2.6.3",
-        "readme-cli-help": ">=0.3.1",
+        "readme-cli-help": ">=0.4.0",
         "typescript": "^5.9.3",
       },
     },
@@ -92,9 +92,9 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.25.10", "", { "os": "win32", "cpu": "x64" }, "sha512-9KpxSVFCu0iK1owoez6aC/s/EdUQLDN3adTxGCqxMVhrPDj6bt5dbrHDXUuq+Bs2vATFBBrQS5vdQ/Ed2P+nbw=="],
 
-    "@optique/core": ["@optique/core@0.6.2", "", {}, "sha512-HTxIHJ8xLOSZotiU6Zc5BCJv+SJ8DMYmuiQM+7tjF7RolJn/pdZNe7M78G3+DgXL9lIf82l8aGcilmgVYRQnGQ=="],
+    "@optique/core": ["@optique/core@0.7.2", "", {}, "sha512-iYRMBHfJXXcCZlEu9i2hGdCa87ts4Twt+UJKQC3weWIz10uxDkA4bSeSiS/CFZJR+9kHPLXZeMmYO9TmKdOgIg=="],
 
-    "@optique/run": ["@optique/run@0.6.2", "", { "dependencies": { "@optique/core": "0.6.2" } }, "sha512-ERksB5bHozwEUVlTPToIc8UjZZBOgLeBhFZYh2lgldUbNDt7LItzgcErsPq5au5i5IBmmyCti4+2A3x+MRI4Xw=="],
+    "@optique/run": ["@optique/run@0.7.2", "", { "dependencies": { "@optique/core": "0.7.2" } }, "sha512-Z9yow3TxKZtkXYH+OtYJe6sfZufTQAvsW2KEtP1C8GheH+i3lBabyFaO8OCjcGlC18eUo2MhQzqvAp1Jf7OrKQ=="],
 
     "@types/bun": ["@types/bun@1.3.0", "", { "dependencies": { "bun-types": "1.3.0" } }, "sha512-+lAGCYjXjip2qY375xX/scJeVRmZ5cY0wyHYyCYxNcdEXrQ4AOe3gACgd4iQ8ksOslJtW4VNxBJ8llUwc3a6AA=="],
 
@@ -110,9 +110,11 @@
 
     "path-class": ["path-class@0.7.2", "", { "dependencies": { "@types/node": "^24.7.1", "xdg-basedir": "^5.1.0" } }, "sha512-vXj1HNmjXZTSPNLaFStTCAIFlMVls9TW44lpI+CFeFbP7vZu7hvQ76ObHABm88NcWrizYQcqqOWeHRnc1TRZtA=="],
 
+    "plural-chain": ["plural-chain@0.2.1", "", {}, "sha512-MTAkLYFtZL+yoFjYzUbsl3fiXftB16MS2AS9MLxApJIgv91neiu65LK/Jg3LNpah/38JErt2NrJsmYdpO1hiLQ=="],
+
     "printable-shell-command": ["printable-shell-command@2.6.3", "", { "dependencies": { "path-class": ">=0.6.1", "type-fest": ">=5.1.0" }, "optionalDependencies": { "@types/bun": "^1.2.20", "@types/node": "^24.2.0" } }, "sha512-u49zQsdil1clG2RKs+PQvoU64FfRXziMi8cTjrL7Cv92q1eYwyNnHM9PAux0qIme2ucWxn3gIYshkXhyS54y5A=="],
 
-    "readme-cli-help": ["readme-cli-help@0.3.1", "", { "dependencies": { "@optique/core": "^0.6.2", "@optique/run": "^0.6.2", "path-class": "^0.8.1" }, "bin": { "readme-cli-help": "main.ts" } }, "sha512-Pj+1xdRURWxbNL3ICALkDPIuWrgL1/Y2g+Eg2QaymqgIUIvfpfR/yNyo/zrrHlxvmPtoUPJ3oTZFnD8wCiyPWQ=="],
+    "readme-cli-help": ["readme-cli-help@0.4.0", "", { "dependencies": { "@optique/core": ">=0.7.2", "@optique/run": ">=0.7.2", "path-class": ">=0.10.2", "plural-chain": "^0.2.1", "printable-shell-command": "^2.7.3" }, "bin": { "readme-cli-help": "src/main.ts" } }, "sha512-606vRZWMDm1K1zeYC9GxOUqTOUNmUFBRDKwISuy57MNwVO4Uffr5eSP2ozjliTf3YJQ5V2NSNJs5GuEV0TN2+w=="],
 
     "tagged-tag": ["tagged-tag@1.0.0", "", {}, "sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng=="],
 
@@ -124,8 +126,8 @@
 
     "xdg-basedir": ["xdg-basedir@5.1.0", "", {}, "sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ=="],
 
-    "readme-cli-help/path-class": ["path-class@0.8.1", "", { "dependencies": { "@types/node": "^24.7.1", "readme-cli-help": "^0.1.10", "xdg-basedir": "^5.1.0" } }, "sha512-ThXv7G7y5PXDbY3hE2x9M57HvNh4pGL9Odl/gXh1WlpOerbN7ByZ0hDEDxVPpg5d9YwLONfCqEowElZsQEaIzQ=="],
+    "readme-cli-help/path-class": ["path-class@0.10.2", "", { "dependencies": { "@types/node": "^24.7.1", "readme-cli-help": ">=0.3.1", "xdg-basedir": "^5.1.0" } }, "sha512-5NxurdtQiVkRdB1m738O7s1eQQdLr9VGPbRWsUDs2hqEEqhfENcgbQHC+s5zczhwtAzppmrB8VHijJi5NwE2Sg=="],
 
-    "readme-cli-help/path-class/readme-cli-help": ["readme-cli-help@0.1.10", "", { "peerDependencies": { "typescript": "^5.0.0" }, "bin": { "readme-cli-help": "main.ts" } }, "sha512-HBu72nVFqoLIBtEQJo1bC+z9zPqz1D84pPSS9mjGPS35AFAoW0Qif7TJVotIpToWVwmjljF0EXeo9Qgy3KbxxQ=="],
+    "readme-cli-help/printable-shell-command": ["printable-shell-command@2.7.3", "", { "dependencies": { "path-class": ">=0.6.1", "type-fest": ">=5.1.0" }, "optionalDependencies": { "@types/bun": "^1.2.20", "@types/node": "^24.2.0" } }, "sha512-dze0g2XUiBTp6EGd5kPSR2i422sabXWFjnk8qOqxbeUCxcNMNDjA2Z3XYq/8ZL6GmS7nhc/HjtRFXBvRP3c03A=="],
   }
 }
