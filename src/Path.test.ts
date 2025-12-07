@@ -67,6 +67,16 @@ test(".hasTrailingSlash()", async () => {
   expect(new Path(import.meta.url).join(".").hasTrailingSlash()).toBe(false);
 });
 
+test(".toggleTrailingSlash(…)", async () => {
+  expect(new Path("/foo/bar").toggleTrailingSlash().path).toBe("/foo/bar/");
+  expect(new Path("/foo/bar/").toggleTrailingSlash().path).toBe("/foo/bar");
+  expect(new Path("/").toggleTrailingSlash().path).toBe("/");
+  expect(new Path("./").toggleTrailingSlash().path).toBe(".");
+  expect(new Path(".").toggleTrailingSlash().path).toBe("./");
+  expect(new Path("../").toggleTrailingSlash().path).toBe("..");
+  expect(new Path("..").toggleTrailingSlash().path).toBe("../");
+});
+
 test("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");

@@ -162,6 +162,27 @@ export class Path {
   }
 
   /**
+   * Toggles or sets a trailing slash as specified.
+   * If the path is `/`, it will always be left as-is.
+   */
+  // Similar convention to:
+  // https://developer.mozilla.org/en-US/docs/Web/API/DOMTokenList/toggle Most
+  // use cases will probably use the `force` parameters, but supporting the
+  // "toggle" use case is easy to implement and hopefully will make the name
+  // and API more familiar to web devs.
+  toggleTrailingSlash(force?: boolean): Path {
+    if (this.#path === "/") {
+      return this;
+    }
+    const wantTrailingSlash = force ?? !this.hasTrailingSlash();
+    if (wantTrailingSlash) {
+      return this.hasTrailingSlash() ? this : this.join("./");
+    } else {
+      return this.hasTrailingSlash() ? new Path(this.#path.slice(0, -1)) : this;
+    }
+  }
+
+  /**
    * Same as `.toString()`, but more concise.
    */
   get path() {
