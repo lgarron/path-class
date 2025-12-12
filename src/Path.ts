@@ -359,6 +359,9 @@ export class Path {
   async exists(constraints?: {
     mustBe: "file" | "directory";
   }): Promise<boolean> {
+    if (constraints?.mustBe === "file") {
+      mustNotHaveTrailingSlash(this);
+    }
     let stats: Awaited<ReturnType<typeof stat>>;
     try {
       stats = await stat(this.#path);
@@ -374,7 +377,6 @@ export class Path {
     }
     switch (constraints?.mustBe) {
       case "file": {
-        mustNotHaveTrailingSlash(this);
         if (stats.isFile()) {
           return true;
         }

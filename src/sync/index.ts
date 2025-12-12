@@ -78,6 +78,9 @@ declare module "../Path" {
 Path.prototype.existsSync = function (constraints?: {
   mustBe: "file" | "directory";
 }): boolean {
+  if (constraints?.mustBe === "file") {
+    mustNotHaveTrailingSlash(this);
+  }
   let stats: ReturnType<typeof statSync>;
   try {
     stats = statSync(this.path);
@@ -93,7 +96,6 @@ Path.prototype.existsSync = function (constraints?: {
   }
   switch (constraints?.mustBe) {
     case "file": {
-      mustNotHaveTrailingSlash(this);
       if (stats.isFile()) {
         return true;
       }
@@ -112,6 +114,7 @@ Path.prototype.existsSync = function (constraints?: {
 };
 
 Path.prototype.existsAsFileSync = function (): boolean {
+  // mustNotHaveTrailingSlash(this);
   return this.existsSync({ mustBe: "file" });
 };
 

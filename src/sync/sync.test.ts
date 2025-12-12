@@ -10,6 +10,9 @@ test(".existsAsFileSync()", () => {
   expect(filePath.existsSync({ mustBe: "file" })).toBe(false);
   expect(filePath.existsSync({ mustBe: "directory" })).toBe(false);
   expect(filePath.existsAsFileSync()).toBe(false);
+  expect(() => filePath.join("./").existsAsFileSync()).toThrow(
+    "Path ends with a slash, which cannot be treated as a file.",
+  );
   filePath.writeSync("test");
   expect(filePath.existsSync()).toBe(true);
   expect(filePath.existsSync({ mustBe: "file" })).toBe(true);

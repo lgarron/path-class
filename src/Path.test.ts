@@ -266,6 +266,9 @@ test(".existsAsFile()", async () => {
   expect(await filePath.exists({ mustBe: "file" })).toBe(false);
   expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
   expect(await filePath.existsAsFile()).toBe(false);
+  expect(() => filePath.join("./").existsAsFile()).toThrow(
+    "Path ends with a slash, which cannot be treated as a file.",
+  );
   await filePath.write("test");
   expect(await filePath.exists()).toBe(true);
   expect(await filePath.exists({ mustBe: "file" })).toBe(true);
