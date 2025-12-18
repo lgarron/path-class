@@ -33,4 +33,4 @@ const zipFile = await tempDir.join("file.zip").write(fetch("https://github.com/l
 await new PrintableShellCommand("unzip", [zipFile]).shellOut({ cwd: tempDir });
 const packageJSON = await tempDir.join("path-class-0.7.2/package.json").readJSON();
 console.log(packageJSON.exports);
-tempDir.rm_rf();
+await tempDir.rm_rf();
