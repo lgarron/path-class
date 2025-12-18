@@ -114,7 +114,6 @@ Path.prototype.existsSync = function (constraints?: {
 };
 
 Path.prototype.existsAsFileSync = function (): boolean {
-  // mustNotHaveTrailingSlash(this);
   return this.existsSync({ mustBe: "file" });
 };
 
