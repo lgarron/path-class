@@ -5,7 +5,6 @@
     "": {
       "name": "path-class",
       "dependencies": {
-        "@types/node": ">=24.7.1",
         "xdg-basedir": "^5.1.0",
       },
       "devDependencies": {
@@ -16,6 +15,9 @@
         "printable-shell-command": "^2.6.3",
         "readme-cli-help": ">=0.4.9",
         "typescript": "^5.9.3",
+      },
+      "peerDependencies": {
+        "@types/node": ">=24.7.1",
       },
     },
   },

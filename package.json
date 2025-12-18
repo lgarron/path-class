@@ -29,8 +29,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@types/node": ">=24.7.1",
     "xdg-basedir": "^5.1.0"
+  },
+  "peerDependencies": {
+    "@types/node": ">=24.7.1"
   },
   "files": [
     "./dist/",
