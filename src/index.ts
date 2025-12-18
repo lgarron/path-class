@@ -1,1 +1,1 @@
-export * from "./Path";
+export { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
