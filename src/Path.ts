@@ -61,7 +61,11 @@ function resolutionPrefix(pathString: string): ResolutionPrefix {
     return ResolutionPrefix.Absolute;
   } else if (pathString.startsWith("./")) {
     return ResolutionPrefix.Relative;
+  } else if (pathString.startsWith("../")) {
+    return ResolutionPrefix.Relative;
   } else if (pathString === ".") {
+    return ResolutionPrefix.Relative;
+  } else if (pathString === "..") {
     return ResolutionPrefix.Relative;
   }
   return ResolutionPrefix.Bare;

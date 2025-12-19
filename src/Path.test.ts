@@ -2,7 +2,7 @@ import { expect, spyOn, test } from "bun:test";
 import { readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { chdir } from "node:process";
-import { Path, stringifyIfPath } from "./Path";
+import { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
 
 test("constructor", async () => {
   expect(new Path("bare").path).toEqual("bare");
@@ -20,6 +20,52 @@ test("constructor", async () => {
   expect(new Path("./down/../again").path).toEqual("./again");
   expect(new Path("down/../again").path).toEqual("again");
   expect(new Path("down/..").path).toEqual(".");
+  expect(new Path("..").path).toEqual("..");
+  expect(new Path("../").path).toEqual("../");
+});
+
+test(".resolutionPrefix", async () => {
+  expect(new Path("bare").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
+  expect(new Path("bare/").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
+  expect(new Path("bare/path").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
+  expect(new Path("bare/path/").resolutionPrefix).toEqual(
+    ResolutionPrefix.Bare,
+  );
+  expect(new Path("./relative").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("./relative/").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("./relative/nested").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("./relative/nested/").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("/absolute").resolutionPrefix).toEqual(
+    ResolutionPrefix.Absolute,
+  );
+  expect(new Path("/absolute/").resolutionPrefix).toEqual(
+    ResolutionPrefix.Absolute,
+  );
+  expect(new Path("/absolute/nested").resolutionPrefix).toEqual(
+    ResolutionPrefix.Absolute,
+  );
+  expect(new Path("/absolute/nested/").resolutionPrefix).toEqual(
+    ResolutionPrefix.Absolute,
+  );
+  expect(new Path("./down/../again").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("down/../again").resolutionPrefix).toEqual(
+    ResolutionPrefix.Bare,
+  );
+  expect(new Path("down/..").resolutionPrefix).toEqual(
+    ResolutionPrefix.Relative,
+  );
+  expect(new Path("..").resolutionPrefix).toEqual(ResolutionPrefix.Relative);
+  expect(new Path("../").resolutionPrefix).toEqual(ResolutionPrefix.Relative);
 });
 
 test("Path.resolve(…)", async () => {
