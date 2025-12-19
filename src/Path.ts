@@ -436,9 +436,26 @@ export class Path {
     await rename(this.#path, new Path(destination).#path);
   }
 
-  /** Create a temporary dir inside the global temp dir for the current user. */
-  static async makeTempDir(prefix?: string): Promise<Path> {
-    return new Path(
+  /**
+   * Create a temporary dir inside the global temp dir for the current user.
+   *
+   * This can be used with [`await
+   * using`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/await_using)
+   * to automatically delete the dir when it goes out of scope.
+   *
+   *     {
+   *       await using tempDir = await Path.makeTempDir();
+   *       // Temporary dir exists while we're inside this block.
+   *     }
+   *     // Temporary dir has now been deleted.
+   *
+   * Note that (due to the semantics of JS runtime implementations) this does
+   * not delete the temp dir if the process calls `exit(…)` before the `using`
+   * goes out of scope.
+   *
+   * */
+  static async makeTempDir(prefix?: string): Promise<AsyncDisposablePath> {
+    return new AsyncDisposablePath(
       await mkdtemp(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
     );
   }
@@ -618,6 +635,12 @@ export class Path {
     }
     console.log(this.#path);
     return this;
+  }
+}
+
+export class AsyncDisposablePath extends Path {
+  async [Symbol.asyncDispose]() {
+    await this.rm_rf();
   }
 }
 

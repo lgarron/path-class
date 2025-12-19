@@ -1,1 +1,6 @@
-export { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
+export {
+  AsyncDisposablePath,
+  Path,
+  ResolutionPrefix,
+  stringifyIfPath,
+} from "./Path";

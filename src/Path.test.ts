@@ -383,14 +383,24 @@ test(".rename(…)", async () => {
 });
 
 test(".makeTempDir(…)", async () => {
-  const tempDir = await Path.makeTempDir();
-  expect(tempDir.path).toContain("/js-temp-");
-  expect(tempDir.basename.path).toStartWith("js-temp-");
-  expect(await tempDir.existsAsDir()).toBe(true);
+  let asyncDisposablePathString: string;
+  {
+    await using tempDir = await Path.makeTempDir();
+    asyncDisposablePathString = tempDir.path;
+    expect(tempDir.path).toContain("/js-temp-");
+    expect(tempDir.basename.path).toStartWith("js-temp-");
+    expect(await tempDir.existsAsDir()).toBe(true);
+  }
+  expect(await new Path(asyncDisposablePathString).existsAsDir()).toBe(false);
 
-  const tempDir2 = await Path.makeTempDir("foo");
-  expect(tempDir2.path).not.toContain("/js-temp-");
-  expect(tempDir2.basename.path).toStartWith("foo");
+  let asyncDisposablePathString2: string;
+  {
+    await using tempDir2 = await Path.makeTempDir("foo");
+    asyncDisposablePathString2 = tempDir2.path;
+    expect(tempDir2.path).not.toContain("/js-temp-");
+    expect(tempDir2.basename.path).toStartWith("foo");
+  }
+  expect(await new Path(asyncDisposablePathString2).existsAsDir()).toBe(false);
 });
 
 test(".rm(…) (file)", async () => {
