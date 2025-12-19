@@ -14,7 +14,7 @@ setup:
 	bun install --frozen-lockfile
 
 .PHONY: check
-check: lint test build
+check: lint test build check-package.json
 
 .PHONY: test
 test:
@@ -34,6 +34,10 @@ lint: setup
 format: setup
 	bun x @biomejs/biome check --write
 	bun x -- readme-cli-help update
+
+.PHONY: check-package.json
+check-package.json: build
+	bun x --package @cubing/dev-config package.json check
 
 .PHONY: publish
 publish:

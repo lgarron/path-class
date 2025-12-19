@@ -1,14 +1,16 @@
 {
   "name": "path-class",
   "version": "0.10.9-dev",
+  "description": "A semantic `Path` class for `node` and `bun`. Inspired by `bun`'s [`file(…)`](https://bun.com/docs/runtime/file-io) API, but `node`-compatible.",
   "author": "Lucas Garron <code@garron.net>",
-  "type": "module",
-  "main": "./dist/lib/path-class/index.js",
-  "types": "./dist/lib/path-class/index.d.ts",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lgarron/path-class.git"
   },
+  "type": "module",
+  "main": "./dist/lib/path-class/index.js",
+  "types": "./dist/lib/path-class/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/lib/path-class/index.d.ts",
@@ -19,6 +21,9 @@
       "import": "./dist/lib/path-class/sync/index.js"
     }
   },
+  "dependencies": {
+    "xdg-basedir": "^5.1.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
     "@cubing/dev-config": "^0.3.6",
@@ -27,9 +32,6 @@
     "printable-shell-command": "^2.6.3",
     "readme-cli-help": ">=0.4.9",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "xdg-basedir": "^5.1.0"
   },
   "peerDependencies": {
     "@types/node": ">=24.7.1"
