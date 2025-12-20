@@ -82,6 +82,15 @@ export class Path {
     this.#setNormalizedPath(s);
   }
 
+  static fromString(s: string): Path {
+    if (typeof s !== "string") {
+      throw new Error(
+        "Invalid argument to `Path.fromString(…)` — expected a string.",
+      );
+    }
+    return new Path(s);
+  }
+
   get resolutionPrefix(): ResolutionPrefix {
     return resolutionPrefix(this.#path);
   }

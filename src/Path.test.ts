@@ -22,6 +22,16 @@ test("constructor", async () => {
   expect(new Path("down/..").path).toEqual(".");
   expect(new Path("..").path).toEqual("..");
   expect(new Path("../").path).toEqual("../");
+  expect(new Path(new URL("file:///root/")).path).toEqual("/root/");
+  expect(new Path(new Path("foo")).path).toEqual("foo");
+});
+
+test(".fromString(…)", async () => {
+  expect(Path.fromString("bare").path).toEqual("bare");
+  // biome-ignore lint/suspicious/noExplicitAny: We're purposely passing an invalid type.
+  expect(() => Path.fromString(new URL("file:///test") as any)).toThrow(
+    "Invalid argument to `Path.fromString(…)` — expected a string.",
+  );
 });
 
 test(".resolutionPrefix", async () => {
