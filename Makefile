@@ -7,7 +7,7 @@ build-js: setup
 
 .PHONY: build-types
 build-types: setup
-	bun x tsc --project ./tsconfig.types.json
+	bun x -- bun-dx --package typescript tsc -- --project ./tsconfig.types.json
 
 .PHONY: setup
 setup:
@@ -22,22 +22,22 @@ test:
 
 .PHONY: lint
 lint: setup
-	bun x @biomejs/biome check
-	bun x -- readme-cli-help check
+	bun x -- bun-dx --package @biomejs/biome biome -- check
+	bun x -- bun-dx --package readme-cli-help readme-cli-help -- check
 	# There should be no `async`/`await` in the sync code.
 	grep -r "async\|await" ./src/sync/ || true
 	bun run ./script/lint-sync-code.ts
-	bun x tsc --noEmit --project .
-	bun x tsc --noEmit --project ./examples/
+	bun x -- bun-dx --package typescript tsc -- --noEmit --project .
+	bun x -- bun-dx --package typescript tsc -- --noEmit --project ./examples/
 
 .PHONY: format
 format: setup
-	bun x @biomejs/biome check --write
-	bun x -- readme-cli-help update
+	bun x -- bun-dx --package @biomejs/biome biome -- check --write
+	bun x -- bun-dx --package readme-cli-help readme-cli-help -- update
 
 .PHONY: check-package.json
 check-package.json: build
-	bun x --package @cubing/dev-config package.json check
+	bun x -- bun-dx --package --package @cubing/dev-config package.json -- check
 
 .PHONY: publish
 publish:

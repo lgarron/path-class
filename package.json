@@ -29,8 +29,9 @@
     "@biomejs/biome": "^2.2.5",
     "@cubing/dev-config": "^0.3.6",
     "@types/bun": "^1.3.0",
+    "bun-dx": "^0.1.0",
     "esbuild": "^0.25.10",
-    "printable-shell-command": "^2.6.3",
+    "printable-shell-command": "^4.0.3",
     "readme-cli-help": ">=0.4.9",
     "typescript": "^5.9.3"
   },
