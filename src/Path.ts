@@ -474,8 +474,8 @@ export class Path {
     await rm(this.#path, options);
   }
 
-  async rmDir(options?: Parameters<typeof rmdir>[1]): Promise<void> {
-    await rmdir(this.#path, options);
+  async rmDir(): Promise<void> {
+    await rmdir(this.#path);
   }
 
   /**

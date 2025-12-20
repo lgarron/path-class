@@ -154,10 +154,8 @@ Path.prototype.rmSync = function (
   rmSync(this.path, options);
 };
 
-Path.prototype.rmDirSync = function (
-  options?: Parameters<typeof rmdirSync>[1],
-): void {
-  rmdirSync(this.path, options);
+Path.prototype.rmDirSync = function (): void {
+  rmdirSync(this.path);
 };
 
 Path.prototype.rm_rfSync = function (
