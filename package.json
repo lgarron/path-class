@@ -1,6 +1,6 @@
 {
   "name": "path-class",
-  "version": "0.10.12-dev",
+  "version": "0.10.12",
   "description": "A semantic `Path` class for `node` and `bun`. Inspired by `bun`'s [`file(…)`](https://bun.com/docs/runtime/file-io) API, but `node`-compatible.",
   "author": "Lucas Garron <code@garron.net>",
   "license": "MIT",
