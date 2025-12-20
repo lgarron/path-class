@@ -37,7 +37,7 @@ format: setup
 
 .PHONY: check-package.json
 check-package.json: build
-	bun x -- bun-dx --package --package @cubing/dev-config package.json -- check
+	bun x -- bun-dx --package @cubing/dev-config package.json -- check
 
 .PHONY: publish
 publish:
