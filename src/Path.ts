@@ -9,6 +9,7 @@ import {
   realpath,
   rename,
   rm,
+  rmdir,
   stat,
   symlink,
   writeFile,
@@ -471,6 +472,10 @@ export class Path {
 
   async rm(options?: Parameters<typeof rm>[1]): Promise<void> {
     await rm(this.#path, options);
+  }
+
+  async rmDir(options?: Parameters<typeof rmdir>[1]): Promise<void> {
+    await rmdir(this.#path, options);
   }
 
   /**

@@ -113,6 +113,18 @@ test(".rmSync(…) (folder)", () => {
   expect(() => tempDir.rmSync()).toThrowError(/ENOENT/);
 });
 
+test(".rmDirSync(…) (folder)", () => {
+  const tempDir = Path.makeTempDirSync();
+  const file = tempDir.join("file.txt");
+  file.writeSync("");
+  expect(tempDir.existsAsDirSync()).toBe(true);
+  expect(() => tempDir.rmDirSync()).toThrowError(/ENOTEMPTY/);
+  file.rmSync();
+  tempDir.rmDirSync();
+  expect(tempDir.existsAsDirSync()).toBe(false);
+  expect(() => tempDir.rmDirSync()).toThrowError(/ENOENT/);
+});
+
 test(".rm_rfSync(…) (file)", () => {
   const file = Path.makeTempDirSync().join("file.txt");
   file.writeSync("");

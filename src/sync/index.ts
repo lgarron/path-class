@@ -7,6 +7,7 @@ import {
   readFileSync,
   realpathSync,
   renameSync,
+  rmdirSync,
   rmSync,
   statSync,
   symlinkSync,
@@ -39,6 +40,7 @@ declare module "../Path" {
     renameSync(destination: string | URL | Path): void;
 
     rmSync(options?: Parameters<typeof rmSync>[1]): void;
+    rmDirSync(options?: Parameters<typeof rmdirSync>[1]): void;
     rm_rfSync(options?: Parameters<typeof rmSync>[1]): void;
 
     readSync: typeof readFileSyncType;
@@ -150,6 +152,12 @@ Path.prototype.rmSync = function (
   options?: Parameters<typeof rmSync>[1],
 ): void {
   rmSync(this.path, options);
+};
+
+Path.prototype.rmDirSync = function (
+  options?: Parameters<typeof rmdirSync>[1],
+): void {
+  rmdirSync(this.path, options);
 };
 
 Path.prototype.rm_rfSync = function (

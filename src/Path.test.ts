@@ -435,6 +435,18 @@ test(".rm(…) (folder)", async () => {
   expect(async () => tempDir.rm()).toThrowError(/ENOENT/);
 });
 
+test(".rmDir(…)", async () => {
+  const tempDir = await Path.makeTempDir();
+  const file = tempDir.join("file.txt");
+  await file.write("");
+  expect(await tempDir.existsAsDir()).toBe(true);
+  expect(async () => tempDir.rmDir()).toThrowError(/ENOTEMPTY/);
+  await file.rm();
+  await tempDir.rmDir();
+  expect(await tempDir.existsAsDir()).toBe(false);
+  expect(async () => tempDir.rmDir()).toThrowError(/ENOENT/);
+});
+
 test(".rm_rf(…) (file)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("");
