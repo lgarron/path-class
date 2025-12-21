@@ -7,7 +7,7 @@ build-js: setup
 
 .PHONY: build-types
 build-types: setup
-	bun x -- bun-dx --package typescript tsc -- --project ./tsconfig.types.json
+	bun x -- bun-dx --package typescript tsc -- --project ./tsconfig.build-types.json
 
 .PHONY: setup
 setup:
@@ -27,8 +27,8 @@ lint: setup
 	# There should be no `async`/`await` in the sync code.
 	grep -r "async\|await" ./src/sync/ || true
 	bun run ./script/lint-sync-code.ts
-	bun x -- bun-dx --package typescript tsc -- --noEmit --project .
-	bun x -- bun-dx --package typescript tsc -- --noEmit --project ./examples/
+	bun x -- bun-dx --package typescript tsc -- --project .
+	bun x -- bun-dx --package typescript tsc -- --project ./examples/
 
 .PHONY: format
 format: setup
