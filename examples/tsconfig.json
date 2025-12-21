@@ -6,5 +6,5 @@
       "path-class": ["../src/index.ts"]
     }
   },
-  "exclude": []
+  "exclude": ["./dist/"]
 }
