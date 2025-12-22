@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Path } from "../Path";
 import "./index";
+import { PrintableShellCommand } from "printable-shell-command";
 
 test(".existsAsFileSync()", () => {
   const filePath = Path.makeTempDirSync().join("file.txt");
@@ -271,4 +272,23 @@ test(".lstatSync(…)", () => {
   expect(target.lstatSync()?.isSymbolicLink()).toBe(true);
 
   expect(target.readTextSync()).toEqual("hello");
+});
+
+test(".chmod(…)", () => {
+  const binPath = Path.makeTempDirSync().join("nonexistent.bin");
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /ENOENT|Premature close/,
+  );
+  binPath.writeSync(`#!/usr/bin/env bash
+
+echo hi`);
+  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
+  //    binPath.writeSync(`#!/usr/bin/env -S bun run --
+
+  // console.log("hi");`);
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /EACCES|Premature close/,
+  );
+  binPath.chmodSync(0o755);
+  expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
 });

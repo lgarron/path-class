@@ -2,6 +2,7 @@ import { expect, spyOn, test } from "bun:test";
 import { readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { chdir } from "node:process";
+import { PrintableShellCommand } from "printable-shell-command";
 import { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
 
 test("constructor", async () => {
@@ -595,6 +596,25 @@ test(".lstat(…)", async () => {
   expect((await target.lstat()).isSymbolicLink()).toBe(true);
 
   expect(await target.readText()).toEqual("hello");
+});
+
+test(".chmod(…)", async () => {
+  const binPath = (await Path.makeTempDir()).join("nonexistent.bin");
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /ENOENT|Premature close/,
+  );
+  await binPath.write(`#!/usr/bin/env bash
+
+echo hi`);
+  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
+  //   await binPath.write(`#!/usr/bin/env -S bun run --
+
+  // console.log("hi");`);
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /EACCES|Premature close/,
+  );
+  await binPath.chmod(0o755);
+  expect(await new PrintableShellCommand(binPath, []).text()).toEqual("hi\n");
 });
 
 test(".homedir", async () => {

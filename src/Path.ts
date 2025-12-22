@@ -1,5 +1,6 @@
 import {
   appendFile,
+  chmod,
   cp,
   lstat,
   mkdir,
@@ -606,6 +607,11 @@ export class Path {
   lstat: typeof lstatType = (...options) =>
     // biome-ignore lint/suspicious/noExplicitAny: Needed to wrangle the types.
     lstat(this.#path, ...options) as any;
+
+  async chmod(mode: Parameters<typeof chmod>[1]): Promise<Path> {
+    await chmod(this.#path, mode);
+    return this;
+  }
 
   static get homedir(): Path {
     return new Path(homedir());

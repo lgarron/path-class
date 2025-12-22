@@ -1,5 +1,6 @@
 import {
   appendFileSync,
+  chmodSync,
   cpSync,
   lstatSync,
   mkdirSync,
@@ -73,6 +74,7 @@ declare module "../Path" {
 
     statSync: typeof statSyncType;
     lstatSync: typeof lstatSyncType;
+    chmodSync(mode: Parameters<typeof chmodSync>[1]): void;
   }
 }
 
@@ -250,4 +252,10 @@ Path.prototype.lstatSync = function (
   options?: Parameters<typeof lstatSync>[1],
 ): ReturnType<typeof lstatSync> {
   return lstatSync(this.path, options);
+};
+
+Path.prototype.chmodSync = function (
+  mode: Parameters<typeof chmodSync>[1],
+): void {
+  chmodSync(this.path, mode);
 };
