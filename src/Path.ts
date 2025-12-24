@@ -1,6 +1,7 @@
 import {
   appendFile,
   chmod,
+  constants,
   cp,
   lstat,
   mkdir,
@@ -610,6 +611,21 @@ export class Path {
 
   async chmod(mode: Parameters<typeof chmod>[1]): Promise<Path> {
     await chmod(this.#path, mode);
+    return this;
+  }
+
+  /**
+   * Add the executable bit (for everyone) to the given path without modifying other bits (`chmod +x`).
+   */
+  async chmodX(): Promise<Path> {
+    const { mode } = await this.stat();
+    await this.chmod(
+      mode |
+        constants.S_IRWXU |
+        constants.S_IXUSR |
+        constants.S_IXGRP |
+        constants.S_IXOTH,
+    );
     return this;
   }
 

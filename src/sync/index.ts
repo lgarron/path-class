@@ -16,6 +16,7 @@ import {
 } from "node:fs";
 import { mustNotHaveTrailingSlash, Path } from "../Path";
 import "./static";
+import { constants } from "node:fs/promises";
 import type {
   lstatSyncType,
   readDirSyncType,
@@ -75,6 +76,7 @@ declare module "../Path" {
     statSync: typeof statSyncType;
     lstatSync: typeof lstatSyncType;
     chmodSync(mode: Parameters<typeof chmodSync>[1]): void;
+    chmodXSync(): Path;
   }
 }
 
@@ -258,4 +260,16 @@ Path.prototype.chmodSync = function (
   mode: Parameters<typeof chmodSync>[1],
 ): void {
   chmodSync(this.path, mode);
+};
+
+Path.prototype.chmodXSync = function (): Path {
+  const { mode } = this.statSync();
+  this.chmodSync(
+    mode |
+      constants.S_IRWXU |
+      constants.S_IXUSR |
+      constants.S_IXGRP |
+      constants.S_IXOTH,
+  );
+  return this;
 };

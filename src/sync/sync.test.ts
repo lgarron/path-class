@@ -274,7 +274,7 @@ test(".lstatSync(…)", () => {
   expect(target.readTextSync()).toEqual("hello");
 });
 
-test(".chmod(…)", () => {
+test(".chmodSync(…)", () => {
   const binPath = Path.makeTempDirSync().join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
@@ -290,5 +290,24 @@ echo hi`);
     /EACCES|Premature close/,
   );
   binPath.chmodSync(0o755);
+  expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
+});
+
+test(".chmodXSync(…)", () => {
+  const binPath = Path.makeTempDirSync().join("nonexistent.bin");
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /ENOENT|Premature close/,
+  );
+  binPath.writeSync(`#!/usr/bin/env bash
+
+echo hi`);
+  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
+  //    binPath.writeSync(`#!/usr/bin/env -S bun run --
+
+  // console.log("hi");`);
+  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
+    /EACCES|Premature close/,
+  );
+  binPath.chmodXSync();
   expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
 });
