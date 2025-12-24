@@ -1,12 +1,13 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Path } from "../Path";
-import "./index";
+import "./PathSync";
 import { PrintableShellCommand } from "printable-shell-command";
 
+import { PathSync } from "./PathSync";
+
 test(".existsAsFileSync()", () => {
-  const filePath = Path.makeTempDirSync().join("file.txt");
+  const filePath = PathSync.makeTempDirSync().join("file.txt");
   expect(filePath.existsSync()).toBe(false);
   expect(filePath.existsSync({ mustBe: "file" })).toBe(false);
   expect(filePath.existsSync({ mustBe: "directory" })).toBe(false);
@@ -18,16 +19,16 @@ test(".existsAsFileSync()", () => {
   expect(filePath.existsSync()).toBe(true);
   expect(filePath.existsSync({ mustBe: "file" })).toBe(true);
   expect(() => filePath.existsSync({ mustBe: "directory" })).toThrow(
-    /Path exists but is not a directory/,
+    /PathSync exists but is not a directory/,
   );
   expect(filePath.existsAsFileSync()).toBe(true);
 });
 
 test(".existsAsDir()", () => {
-  const filePath = Path.makeTempDirSync();
+  const filePath = PathSync.makeTempDirSync();
   expect(filePath.existsSync()).toBe(true);
   expect(() => filePath.existsSync({ mustBe: "file" })).toThrow(
-    /Path exists but is not a file/,
+    /PathSync exists but is not a file/,
   );
   expect(filePath.existsSync({ mustBe: "directory" })).toBe(true);
   expect(filePath.existsAsDirSync()).toBe(true);
@@ -39,14 +40,14 @@ test(".existsAsDir()", () => {
 });
 
 test(".mkdirSync(…) (un-nested)", () => {
-  const dir = Path.makeTempDirSync().join("mkdir-test");
+  const dir = PathSync.makeTempDirSync().join("mkdir-test");
   expect(dir.existsSync()).toBe(false);
   dir.mkdirSync();
   expect(dir.existsSync()).toBe(true);
 });
 
 test(".mkdirSync(…) (nested)", () => {
-  const dir = Path.makeTempDirSync().join("mkdir-test/nested");
+  const dir = PathSync.makeTempDirSync().join("mkdir-test/nested");
   expect(dir.existsSync()).toBe(false);
   expect(() => dir.mkdirSync({ recursive: false })).toThrow("no such file");
   dir.mkdirSync();
@@ -54,7 +55,7 @@ test(".mkdirSync(…) (nested)", () => {
 });
 
 test(".cpSync(…)", () => {
-  const parentDir = Path.makeTempDirSync();
+  const parentDir = PathSync.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
 
@@ -68,7 +69,7 @@ test(".cpSync(…)", () => {
 });
 
 test(".renameSync(…)", () => {
-  const parentDir = Path.makeTempDirSync();
+  const parentDir = PathSync.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
 
@@ -82,18 +83,18 @@ test(".renameSync(…)", () => {
 });
 
 test(".makeTempDirSync(…)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   expect(tempDir.path).toContain("/js-temp-");
   expect(tempDir.basename.path).toStartWith("js-temp-");
   expect(tempDir.existsAsDirSync()).toBe(true);
 
-  const tempDir2 = Path.makeTempDirSync("foo");
+  const tempDir2 = PathSync.makeTempDirSync("foo");
   expect(tempDir2.path).not.toContain("/js-temp-");
   expect(tempDir2.basename.path).toStartWith("foo");
 });
 
 test(".rmSync(…) (file)", () => {
-  const file = Path.makeTempDirSync().join("file.txt");
+  const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("");
   expect(file.existsAsFileSync()).toBe(true);
   file.rmSync();
@@ -103,7 +104,7 @@ test(".rmSync(…) (file)", () => {
 });
 
 test(".rmSync(…) (folder)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.txt");
   file.writeSync("");
   expect(tempDir.existsAsDirSync()).toBe(true);
@@ -115,7 +116,7 @@ test(".rmSync(…) (folder)", () => {
 });
 
 test(".rmDirSync(…) (folder)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.txt");
   file.writeSync("");
   expect(tempDir.existsAsDirSync()).toBe(true);
@@ -127,7 +128,7 @@ test(".rmDirSync(…) (folder)", () => {
 });
 
 test(".rm_rfSync(…) (file)", () => {
-  const file = Path.makeTempDirSync().join("file.txt");
+  const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("");
   expect(file.existsAsFileSync()).toBe(true);
   file.rm_rfSync();
@@ -138,7 +139,7 @@ test(".rm_rfSync(…) (file)", () => {
 });
 
 test(".rm_rfSync(…) (folder)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   tempDir.join("file.txt").writeSync("");
   expect(tempDir.path).toContain("/js-temp-");
   expect(tempDir.existsSync()).toBe(true);
@@ -149,7 +150,7 @@ test(".rm_rfSync(…) (folder)", () => {
 });
 
 test(".readTextSync()", () => {
-  const file = Path.makeTempDirSync().join("file.txt");
+  const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("hi");
   file.writeSync("bye");
 
@@ -158,7 +159,7 @@ test(".readTextSync()", () => {
 });
 
 test(".readJSONSync()", () => {
-  const file = Path.makeTempDirSync().join("file.json");
+  const file = PathSync.makeTempDirSync().join("file.json");
   file.writeSync(JSON.stringify({ foo: "bar" }));
 
   expect(file.readJSONSync()).toEqual<Record<string, string>>({ foo: "bar" });
@@ -169,7 +170,7 @@ test(".readJSONSync()", () => {
 });
 
 test(".readJSONSync(…) with fallback", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.json");
   const json: { foo?: number } = file.readJSONSync({ fallback: { foo: 4 } });
   expect(json).toEqual({ foo: 4 });
@@ -187,7 +188,7 @@ test(".readJSONSync(…) with fallback", () => {
 });
 
 test(".writeSync(…)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.json");
   expect(file.writeSync("foo")).toBe(file);
 
@@ -203,14 +204,14 @@ test(".writeSync(…)", () => {
 });
 
 test(".writeJSONSync(…)", () => {
-  const file = Path.makeTempDirSync().join("file.json");
+  const file = PathSync.makeTempDirSync().join("file.json");
   expect(file.writeJSONSync({ foo: "bar" })).toBe(file);
 
   expect(file.readJSONSync()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
 test(".appendFileSync(…)", () => {
-  const file = Path.makeTempDirSync().join("file.txt");
+  const file = PathSync.makeTempDirSync().join("file.txt");
   file.appendFileSync("test\n");
   expect(file.readTextSync()).toEqual("test\n");
   file.appendFileSync("more\n");
@@ -218,7 +219,7 @@ test(".appendFileSync(…)", () => {
 });
 
 test(".readDirSync(…)", () => {
-  const dir = Path.makeTempDirSync();
+  const dir = PathSync.makeTempDirSync();
   dir.join("file.txt").writeSync("hello");
   dir.join("dir/file.json").writeSync("hello");
 
@@ -232,7 +233,7 @@ test(".readDirSync(…)", () => {
 });
 
 test(".symlinkSync(…)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
   source.symlinkSync(target);
@@ -244,7 +245,7 @@ test(".symlinkSync(…)", () => {
 });
 
 test(".realpathSync(…)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   source.writeSync("hello world!");
   const target = tempDir.join("bar.txt");
@@ -253,7 +254,7 @@ test(".realpathSync(…)", () => {
 });
 
 test(".statSync(…)", () => {
-  const file = Path.makeTempDirSync().join("foo.txt");
+  const file = PathSync.makeTempDirSync().join("foo.txt");
   file.writeSync("hello");
 
   expect(file.statSync()?.size).toEqual(5);
@@ -262,7 +263,7 @@ test(".statSync(…)", () => {
 });
 
 test(".lstatSync(…)", () => {
-  const tempDir = Path.makeTempDirSync();
+  const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
   source.symlinkSync(target);
@@ -275,7 +276,7 @@ test(".lstatSync(…)", () => {
 });
 
 test(".chmodSync(…)", () => {
-  const binPath = Path.makeTempDirSync().join("nonexistent.bin");
+  const binPath = PathSync.makeTempDirSync().join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
   );
@@ -294,7 +295,7 @@ echo hi`);
 });
 
 test(".chmodXSync(…)", () => {
-  const binPath = Path.makeTempDirSync().join("nonexistent.bin");
+  const binPath = PathSync.makeTempDirSync().join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
   );

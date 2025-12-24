@@ -1,8 +1,10 @@
 // Note: this file is `.ts` rather than `.d.ts` to ensure it ends up in the `tsc` output.
 
+import type { Abortable } from "node:events";
 import type {
   BigIntStats,
   Dirent,
+  Mode,
   ObjectEncodingOptions,
   StatSyncOptions,
   Stats,
@@ -30,6 +32,15 @@ export declare function readFileSyncType(
     | BufferEncoding
     | null,
 ): string | NonSharedBuffer;
+export type WriteFileOptions =
+  | (ObjectEncodingOptions &
+      Abortable & {
+        mode?: Mode | undefined;
+        flag?: string | undefined;
+        flush?: boolean | undefined;
+      })
+  | BufferEncoding
+  | null;
 
 export declare function readDirSyncType(
   options?:

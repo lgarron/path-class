@@ -59,7 +59,7 @@ export enum ResolutionPrefix {
   Bare = "bare",
 }
 
-function resolutionPrefix(pathString: string): ResolutionPrefix {
+export function resolutionPrefix(pathString: string): ResolutionPrefix {
   if (pathString.startsWith("/")) {
     return ResolutionPrefix.Absolute;
   } else if (pathString.startsWith("./")) {
