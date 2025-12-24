@@ -75,7 +75,7 @@ declare module "../Path" {
 
     statSync: typeof statSyncType;
     lstatSync: typeof lstatSyncType;
-    chmodSync(mode: Parameters<typeof chmodSync>[1]): void;
+    chmodSync(mode: Parameters<typeof chmodSync>[1]): Path;
     chmodXSync(): Path;
   }
 }
@@ -258,8 +258,9 @@ Path.prototype.lstatSync = function (
 
 Path.prototype.chmodSync = function (
   mode: Parameters<typeof chmodSync>[1],
-): void {
+): Path {
   chmodSync(this.path, mode);
+  return this;
 };
 
 Path.prototype.chmodXSync = function (): Path {
