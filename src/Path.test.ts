@@ -134,6 +134,13 @@ test(".toggleTrailingSlash(…)", async () => {
   expect(new Path("..").toggleTrailingSlash().path).toBe("../");
 });
 
+test(".blue", async () => {
+  expect(Path.fromString("bare").path).toEqual("bare");
+  expect(`Home dir: ${Path.homedir.blue}`).toEqual(
+    "Home dir: \u001b[1m\u001b[34m/mock/home/dir\u001b[39m\u001b[22m",
+  );
+});
+
 test("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");

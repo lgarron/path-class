@@ -209,6 +209,19 @@ export class Path {
     return this.#path;
   }
 
+  /**
+   * Format this with the escape codes for printing to the shell in bold blue.
+   *
+   * Example usage:
+   *
+   *     console.log(`Processing: ${path.blue}`)
+   *
+   */
+  get blue() {
+    const { styleText } = globalThis.process.getBuiltinModule("node:util");
+    return styleText(["bold", "blue"], this.#path);
+  }
+
   /** Constructs a new path by appending the given path segments.
    * This follows `node` semantics for absolute paths: leading slashes in the given descendant segments are ignored.
    */
