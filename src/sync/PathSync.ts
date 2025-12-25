@@ -260,11 +260,7 @@ export class PathSync extends Path {
   chmodXSync(): PathSync {
     const { mode } = this.statSync();
     this.chmodSync(
-      mode |
-        constants.S_IRWXU |
-        constants.S_IXUSR |
-        constants.S_IXGRP |
-        constants.S_IXOTH,
+      mode | constants.S_IXUSR | constants.S_IXGRP | constants.S_IXOTH,
     );
     return this;
   }

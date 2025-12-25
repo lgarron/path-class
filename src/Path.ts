@@ -633,11 +633,7 @@ export class Path {
   async chmodX(): Promise<Path> {
     const { mode } = await this.stat();
     await this.chmod(
-      mode |
-        constants.S_IRWXU |
-        constants.S_IXUSR |
-        constants.S_IXGRP |
-        constants.S_IXOTH,
+      mode | constants.S_IXUSR | constants.S_IXGRP | constants.S_IXOTH,
     );
     return this;
   }

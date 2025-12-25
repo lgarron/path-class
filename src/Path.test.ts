@@ -1,5 +1,5 @@
 import { expect, spyOn, test } from "bun:test";
-import { readFile, realpath } from "node:fs/promises";
+import { constants, readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { chdir } from "node:process";
 import { PrintableShellCommand } from "printable-shell-command";
@@ -639,8 +639,14 @@ echo hi`);
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /EACCES|Premature close/,
   );
+  expect((await binPath.stat()).mode & constants.S_IWUSR).toBeTruthy();
+  await binPath.chmod(0o444);
+  expect((await binPath.stat()).mode & constants.S_IWUSR).toBeFalsy();
+  expect((await binPath.stat()).mode & constants.S_IXUSR).toBeFalsy();
   await binPath.chmodX();
   expect(await new PrintableShellCommand(binPath, []).text()).toEqual("hi\n");
+  expect((await binPath.stat()).mode & constants.S_IWUSR).toBeFalsy();
+  expect((await binPath.stat()).mode & constants.S_IXUSR).toBeTruthy();
 });
 
 test(".homedir", async () => {

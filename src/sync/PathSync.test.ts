@@ -2,8 +2,8 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import "./PathSync";
+import { constants } from "node:fs/promises";
 import { PrintableShellCommand } from "printable-shell-command";
-
 import { PathSync } from "./PathSync";
 
 test(".existsAsFileSync()", () => {
@@ -309,6 +309,12 @@ echo hi`);
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /EACCES|Premature close/,
   );
+  expect(binPath.statSync().mode & constants.S_IWUSR).toBeTruthy();
+  binPath.chmodSync(0o444);
+  expect(binPath.statSync().mode & constants.S_IWUSR).toBeFalsy();
+  expect(binPath.statSync().mode & constants.S_IXUSR).toBeFalsy();
   binPath.chmodXSync();
   expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
+  expect(binPath.statSync().mode & constants.S_IWUSR).toBeFalsy();
+  expect(binPath.statSync().mode & constants.S_IXUSR).toBeTruthy();
 });
