@@ -457,8 +457,15 @@ export class Path {
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
-  async rename(destination: string | URL | Path): Promise<void> {
-    await rename(this.#path, new Path(destination).#path);
+  async rename(
+    destination: string | URL | Path,
+    options?: { createIntermediateDirs?: boolean },
+  ): Promise<void> {
+    const destinationPath = new Path(destination);
+    if (options?.createIntermediateDirs ?? true) {
+      await destinationPath.parent.mkdir();
+    }
+    await rename(this.#path, destinationPath.#path);
   }
 
   /**
@@ -712,3 +719,8 @@ export function mustNotHaveTrailingSlash(path: Path): void {
     );
   }
 }
+
+const tmp = await Path.makeTempDir();
+(await tmp.join("foo.json").write("foo")).rename(
+  tmp.join("sdfsD", "sdfsdfsdf", "sdfsdf.json"),
+);

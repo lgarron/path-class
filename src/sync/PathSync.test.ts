@@ -72,6 +72,7 @@ test.concurrent(".renameSync(…)", () => {
   const parentDir = PathSync.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
+  const file3 = parentDir.join("nonexistent/dirs/file3.txt");
 
   file1.writeSync("hello world");
   expect(file1.existsSync()).toBe(true);
@@ -80,6 +81,16 @@ test.concurrent(".renameSync(…)", () => {
   file1.renameSync(file2);
   expect(file1.existsSync()).toBe(false);
   expect(file2.existsSync()).toBe(true);
+
+  expect(() =>
+    file2.renameSync(file3, { createIntermediateDirs: false }),
+  ).toThrow(/^ENOENT/);
+  expect(file2.existsSync()).toBe(true);
+  expect(file3.existsSync()).toBe(false);
+
+  file2.renameSync(file3);
+  expect(file2.existsSync()).toBe(false);
+  expect(file3.existsSync()).toBe(true);
 });
 
 test.concurrent(".makeTempDirSync(…)", () => {

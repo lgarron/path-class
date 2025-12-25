@@ -390,6 +390,7 @@ test.concurrent(".rename(…)", async () => {
   const parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
+  const file3 = parentDir.join("nonexistent/dirs/file3.txt");
 
   await file1.write("hello world");
   expect(await file1.exists()).toBe(true);
@@ -398,6 +399,16 @@ test.concurrent(".rename(…)", async () => {
   await file1.rename(file2);
   expect(await file1.exists()).toBe(false);
   expect(await file2.exists()).toBe(true);
+
+  expect(() => file2.rename(file3, { createIntermediateDirs: false })).toThrow(
+    /^ENOENT/,
+  );
+  expect(await file2.exists()).toBe(true);
+  expect(await file3.exists()).toBe(false);
+
+  await file2.rename(file3);
+  expect(await file2.exists()).toBe(false);
+  expect(await file3.exists()).toBe(true);
 });
 
 test.concurrent(".makeTempDir(…)", async () => {

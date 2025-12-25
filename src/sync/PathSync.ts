@@ -150,8 +150,15 @@ export class PathSync extends Path {
     return new PathSync(destination);
   }
 
-  renameSync(destination: string | URL | Path): void {
-    renameSync(this.path, new Path(destination).path);
+  renameSync(
+    destination: string | URL | Path,
+    options?: { createIntermediateDirs?: boolean },
+  ): void {
+    const destinationPath = new PathSync(destination);
+    if (options?.createIntermediateDirs ?? true) {
+      destinationPath.parent.mkdirSync();
+    }
+    renameSync(this.path, destinationPath.path);
   }
 
   static makeTempDirSync(prefix?: string): PathSync {
