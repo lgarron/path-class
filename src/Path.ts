@@ -589,7 +589,7 @@ export class Path {
     return targetPath;
   }
 
-  // I don't think `lstat` is a great name, but it does match the
+  // I don't think `realpath` is a great name, but it does match the
   // well-established canonical commandline name. So in this case we keep the
   // name instead of using `realPath`.
   //
