@@ -6,7 +6,7 @@ import { constants } from "node:fs/promises";
 import { PrintableShellCommand } from "printable-shell-command";
 import { PathSync } from "./PathSync";
 
-test(".existsAsFileSync()", () => {
+test.concurrent(".existsAsFileSync()", () => {
   const filePath = PathSync.makeTempDirSync().join("file.txt");
   expect(filePath.existsSync()).toBe(false);
   expect(filePath.existsSync({ mustBe: "file" })).toBe(false);
@@ -24,7 +24,7 @@ test(".existsAsFileSync()", () => {
   expect(filePath.existsAsFileSync()).toBe(true);
 });
 
-test(".existsAsDir()", () => {
+test.concurrent(".existsAsDir()", () => {
   const filePath = PathSync.makeTempDirSync();
   expect(filePath.existsSync()).toBe(true);
   expect(() => filePath.existsSync({ mustBe: "file" })).toThrow(
@@ -39,14 +39,14 @@ test(".existsAsDir()", () => {
   expect(filePath.existsAsDirSync()).toBe(false);
 });
 
-test(".mkdirSync(…) (un-nested)", () => {
+test.concurrent(".mkdirSync(…) (un-nested)", () => {
   const dir = PathSync.makeTempDirSync().join("mkdir-test");
   expect(dir.existsSync()).toBe(false);
   dir.mkdirSync();
   expect(dir.existsSync()).toBe(true);
 });
 
-test(".mkdirSync(…) (nested)", () => {
+test.concurrent(".mkdirSync(…) (nested)", () => {
   const dir = PathSync.makeTempDirSync().join("mkdir-test/nested");
   expect(dir.existsSync()).toBe(false);
   expect(() => dir.mkdirSync({ recursive: false })).toThrow("no such file");
@@ -54,7 +54,7 @@ test(".mkdirSync(…) (nested)", () => {
   expect(dir.existsSync()).toBe(true);
 });
 
-test(".cpSync(…)", () => {
+test.concurrent(".cpSync(…)", () => {
   const parentDir = PathSync.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
@@ -68,7 +68,7 @@ test(".cpSync(…)", () => {
   expect(file2.existsSync()).toBe(true);
 });
 
-test(".renameSync(…)", () => {
+test.concurrent(".renameSync(…)", () => {
   const parentDir = PathSync.makeTempDirSync();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
@@ -82,7 +82,7 @@ test(".renameSync(…)", () => {
   expect(file2.existsSync()).toBe(true);
 });
 
-test(".makeTempDirSync(…)", () => {
+test.concurrent(".makeTempDirSync(…)", () => {
   const tempDir = PathSync.makeTempDirSync();
   expect(tempDir.path).toContain("/js-temp-");
   expect(tempDir.basename.path).toStartWith("js-temp-");
@@ -93,7 +93,7 @@ test(".makeTempDirSync(…)", () => {
   expect(tempDir2.basename.path).toStartWith("foo");
 });
 
-test(".rmSync(…) (file)", () => {
+test.concurrent(".rmSync(…) (file)", () => {
   const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("");
   expect(file.existsAsFileSync()).toBe(true);
@@ -103,7 +103,7 @@ test(".rmSync(…) (file)", () => {
   expect(() => file.rmSync()).toThrowError(/ENOENT/);
 });
 
-test(".rmSync(…) (folder)", () => {
+test.concurrent(".rmSync(…) (folder)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.txt");
   file.writeSync("");
@@ -115,7 +115,7 @@ test(".rmSync(…) (folder)", () => {
   expect(() => tempDir.rmSync()).toThrowError(/ENOENT/);
 });
 
-test(".rmDirSync(…) (folder)", () => {
+test.concurrent(".rmDirSync(…) (folder)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.txt");
   file.writeSync("");
@@ -127,7 +127,7 @@ test(".rmDirSync(…) (folder)", () => {
   expect(() => tempDir.rmDirSync()).toThrowError(/ENOENT/);
 });
 
-test(".rm_rfSync(…) (file)", () => {
+test.concurrent(".rm_rfSync(…) (file)", () => {
   const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("");
   expect(file.existsAsFileSync()).toBe(true);
@@ -138,7 +138,7 @@ test(".rm_rfSync(…) (file)", () => {
   expect(file.existsAsFileSync()).toBe(false);
 });
 
-test(".rm_rfSync(…) (folder)", () => {
+test.concurrent(".rm_rfSync(…) (folder)", () => {
   const tempDir = PathSync.makeTempDirSync();
   tempDir.join("file.txt").writeSync("");
   expect(tempDir.path).toContain("/js-temp-");
@@ -149,7 +149,7 @@ test(".rm_rfSync(…) (folder)", () => {
   expect(tempDir.existsSync()).toBe(false);
 });
 
-test(".readTextSync()", () => {
+test.concurrent(".readTextSync()", () => {
   const file = PathSync.makeTempDirSync().join("file.txt");
   file.writeSync("hi");
   file.writeSync("bye");
@@ -158,7 +158,7 @@ test(".readTextSync()", () => {
   expect(readFileSync(file.path, "utf-8")).toBe("bye");
 });
 
-test(".readJSONSync()", () => {
+test.concurrent(".readJSONSync()", () => {
   const file = PathSync.makeTempDirSync().join("file.json");
   file.writeSync(JSON.stringify({ foo: "bar" }));
 
@@ -169,7 +169,7 @@ test(".readJSONSync()", () => {
   >({ foo: "bar" });
 });
 
-test(".readJSONSync(…) with fallback", () => {
+test.concurrent(".readJSONSync(…) with fallback", () => {
   const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.json");
   const json: { foo?: number } = file.readJSONSync({ fallback: { foo: 4 } });
@@ -187,7 +187,7 @@ test(".readJSONSync(…) with fallback", () => {
   );
 });
 
-test(".writeSync(…)", () => {
+test.concurrent(".writeSync(…)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const file = tempDir.join("file.json");
   expect(file.writeSync("foo")).toBe(file);
@@ -203,14 +203,14 @@ test(".writeSync(…)", () => {
   ).toEqual("bar");
 });
 
-test(".writeJSONSync(…)", () => {
+test.concurrent(".writeJSONSync(…)", () => {
   const file = PathSync.makeTempDirSync().join("file.json");
   expect(file.writeJSONSync({ foo: "bar" })).toBe(file);
 
   expect(file.readJSONSync()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
-test(".appendFileSync(…)", () => {
+test.concurrent(".appendFileSync(…)", () => {
   const file = PathSync.makeTempDirSync().join("file.txt");
   file.appendFileSync("test\n");
   expect(file.readTextSync()).toEqual("test\n");
@@ -218,7 +218,7 @@ test(".appendFileSync(…)", () => {
   expect(file.readTextSync()).toEqual("test\nmore\n");
 });
 
-test(".readDirSync(…)", () => {
+test.concurrent(".readDirSync(…)", () => {
   const dir = PathSync.makeTempDirSync();
   dir.join("file.txt").writeSync("hello");
   dir.join("dir/file.json").writeSync("hello");
@@ -232,7 +232,7 @@ test(".readDirSync(…)", () => {
   );
 });
 
-test(".symlinkSync(…)", () => {
+test.concurrent(".symlinkSync(…)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
@@ -244,7 +244,7 @@ test(".symlinkSync(…)", () => {
   expect(target.readTextSync()).toEqual("hello");
 });
 
-test(".realpathSync(…)", () => {
+test.concurrent(".realpathSync(…)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   source.writeSync("hello world!");
@@ -253,7 +253,7 @@ test(".realpathSync(…)", () => {
   expect(source.realpathSync().path).toEqual(target.realpathSync().path);
 });
 
-test(".statSync(…)", () => {
+test.concurrent(".statSync(…)", () => {
   const file = PathSync.makeTempDirSync().join("foo.txt");
   file.writeSync("hello");
 
@@ -262,7 +262,7 @@ test(".statSync(…)", () => {
   expect(file.statSync({ bigint: true })?.size).toBeTypeOf("bigint");
 });
 
-test(".lstatSync(…)", () => {
+test.concurrent(".lstatSync(…)", () => {
   const tempDir = PathSync.makeTempDirSync();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
@@ -275,7 +275,7 @@ test(".lstatSync(…)", () => {
   expect(target.readTextSync()).toEqual("hello");
 });
 
-test(".chmodSync(…)", () => {
+test.concurrent(".chmodSync(…)", () => {
   const binPath = PathSync.makeTempDirSync().join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
@@ -294,7 +294,7 @@ echo hi`);
   expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
 });
 
-test(".chmodXSync(…)", () => {
+test.concurrent(".chmodXSync(…)", () => {
   const binPath = PathSync.makeTempDirSync().join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,

@@ -5,7 +5,7 @@ import { chdir } from "node:process";
 import { PrintableShellCommand } from "printable-shell-command";
 import { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
 
-test("constructor", async () => {
+test.concurrent("constructor", async () => {
   expect(new Path("bare").path).toEqual("bare");
   expect(new Path("bare/").path).toEqual("bare/");
   expect(new Path("bare/path").path).toEqual("bare/path");
@@ -27,7 +27,7 @@ test("constructor", async () => {
   expect(new Path(new Path("foo")).path).toEqual("foo");
 });
 
-test(".fromString(…)", async () => {
+test.concurrent(".fromString(…)", async () => {
   expect(Path.fromString("bare").path).toEqual("bare");
   // biome-ignore lint/suspicious/noExplicitAny: We're purposely passing an invalid type.
   expect(() => Path.fromString(new URL("file:///test") as any)).toThrow(
@@ -35,7 +35,7 @@ test(".fromString(…)", async () => {
   );
 });
 
-test(".resolutionPrefix", async () => {
+test.concurrent(".resolutionPrefix", async () => {
   expect(new Path("bare").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
   expect(new Path("bare/").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
   expect(new Path("bare/path").resolutionPrefix).toEqual(ResolutionPrefix.Bare);
@@ -79,7 +79,7 @@ test(".resolutionPrefix", async () => {
   expect(new Path("../").resolutionPrefix).toEqual(ResolutionPrefix.Relative);
 });
 
-test("Path.resolve(…)", async () => {
+test.concurrent("Path.resolve(…)", async () => {
   expect(Path.resolve("foo/lish", new Path("/bar/baz")).path).toEqual(
     "/bar/foo/lish",
   );
@@ -95,13 +95,13 @@ test("Path.resolve(…)", async () => {
   );
 });
 
-test(".isAbsolutePath()", async () => {
+test.concurrent(".isAbsolutePath()", async () => {
   expect(new Path("/foo/bar").isAbsolutePath()).toBe(true);
   expect(new Path("foo/bar").isAbsolutePath()).toBe(false);
   expect(new Path(import.meta.url).isAbsolutePath()).toBe(true);
 });
 
-test(".toFileURL()", async () => {
+test.concurrent(".toFileURL()", async () => {
   expect(new Path("/foo/bar").toFileURL().toString()).toEqual(
     "file:///foo/bar",
   );
@@ -111,7 +111,7 @@ test(".toFileURL()", async () => {
   );
 });
 
-test(".hasTrailingSlash()", async () => {
+test.concurrent(".hasTrailingSlash()", async () => {
   expect(new Path("/foo/bar").hasTrailingSlash()).toBe(false);
   expect(new Path("/foo/bar/").hasTrailingSlash()).toBe(true);
   expect(new Path("foo/bar").hasTrailingSlash()).toBe(false);
@@ -124,7 +124,7 @@ test(".hasTrailingSlash()", async () => {
   expect(new Path(import.meta.url).join(".").hasTrailingSlash()).toBe(false);
 });
 
-test(".toggleTrailingSlash(…)", async () => {
+test.concurrent(".toggleTrailingSlash(…)", async () => {
   expect(new Path("/foo/bar").toggleTrailingSlash().path).toBe("/foo/bar/");
   expect(new Path("/foo/bar/").toggleTrailingSlash().path).toBe("/foo/bar");
   expect(new Path("/").toggleTrailingSlash().path).toBe("/");
@@ -134,14 +134,14 @@ test(".toggleTrailingSlash(…)", async () => {
   expect(new Path("..").toggleTrailingSlash().path).toBe("../");
 });
 
-test(".blue", async () => {
+test.concurrent(".blue", async () => {
   expect(Path.fromString("bare").path).toEqual("bare");
   expect(`Home dir: ${Path.homedir.blue}`).toEqual(
     "Home dir: \u001b[1m\u001b[34m/mock/home/dir\u001b[39m\u001b[22m",
   );
 });
 
-test("normalize", async () => {
+test.concurrent("normalize", async () => {
   expect(new Path("foo//bar").path).toEqual("foo/bar");
   expect(new Path("foo////bar").path).toEqual("foo/bar");
   expect(new Path("foo/bar/").path).toEqual("foo/bar/");
@@ -149,7 +149,7 @@ test("normalize", async () => {
   expect(new Path("//absolute////bar").path).toEqual("/absolute/bar");
 });
 
-test(".join(…)", async () => {
+test.concurrent(".join(…)", async () => {
   expect(new Path("foo").join("bar").path).toEqual("foo/bar");
   expect(new Path("foo/bar").join("bath", "kitchen/sink").path).toEqual(
     "foo/bar/bath/kitchen/sink",
@@ -163,7 +163,7 @@ test(".join(…)", async () => {
   );
 });
 
-test("asRelative()", async () => {
+test.concurrent("asRelative()", async () => {
   // From doc comment
   expect(new Path("bare").asRelative().path).toEqual("./bare");
   expect(new Path("./relative").asRelative().path).toEqual("./relative");
@@ -181,7 +181,7 @@ test("asRelative()", async () => {
   expect(new Path("../up/").asRelative().path).toEqual("../up/");
 });
 
-test("asAbsolute()", async () => {
+test.concurrent("asAbsolute()", async () => {
   // From doc comment
   expect(new Path("bare").asAbsolute().path).toEqual("/bare");
   expect(new Path("./relative").asAbsolute().path).toEqual("/relative");
@@ -193,7 +193,7 @@ test("asAbsolute()", async () => {
   expect(new Path("../up/").asAbsolute().path).toEqual("/up/");
 });
 
-test("asBare(…)", async () => {
+test.concurrent("asBare(…)", async () => {
   const ERROR_1 =
     'Converting path to a bare path resulted in a `..` traversal prefix. Pass `"strip"` or `"keep"` as the `parentTraversalHandling` option to avoid an error.';
   const ERROR_2 = "Output does not start with a named component.";
@@ -268,7 +268,7 @@ test("asBare(…)", async () => {
   ).toThrow(ERROR_2);
 });
 
-test("traverse", async () => {
+test.concurrent("traverse", async () => {
   expect(new Path("foo/bar").join("..").path).toEqual("foo");
   expect(new Path("foo/bar").join(".").path).toEqual("foo/bar");
   expect(new Path("foo/bar").join("../baz").path).toEqual("foo/baz");
@@ -277,7 +277,7 @@ test("traverse", async () => {
   expect(new Path("/").join("..").path).toEqual("/");
 });
 
-test(".extendBasename(…)", async () => {
+test.concurrent(".extendBasename(…)", async () => {
   expect(new Path("file.mp4").extendBasename(".hevc.qv65.mov").path).toEqual(
     "file.mp4.hevc.qv65.mov",
   );
@@ -287,19 +287,19 @@ test(".extendBasename(…)", async () => {
   );
 });
 
-test(".parent", async () => {
+test.concurrent(".parent", async () => {
   expect(new Path("/").parent.path).toEqual("/");
   expect(new Path("dir").parent.path).toEqual(".");
   expect(new Path("dir/").parent.path).toEqual(".");
 });
 
-test(".dirname", async () => {
+test.concurrent(".dirname", async () => {
   expect(new Path("/").dirname.path).toEqual("/");
   expect(new Path("dir").dirname.path).toEqual(".");
   expect(new Path("dir/").dirname.path).toEqual(".");
 });
 
-test(".basename", async () => {
+test.concurrent(".basename", async () => {
   expect(new Path("/").basename.path).toEqual("."); // TODO?
   expect(new Path("dir").basename.path).toEqual("dir");
   expect(new Path("dir/").basename.path).toEqual("dir");
@@ -308,7 +308,7 @@ test(".basename", async () => {
   );
 });
 
-test(".extension", async () => {
+test.concurrent(".extension", async () => {
   expect(new Path("foo.txt").extension).toEqual(".txt");
   expect(new Path("foo.").extension).toEqual(".");
   expect(new Path("foo").extension).toEqual("");
@@ -316,7 +316,7 @@ test(".extension", async () => {
   expect(() => new Path("/").extension).toThrow();
 });
 
-test(".extname", async () => {
+test.concurrent(".extname", async () => {
   expect(new Path("foo.txt").extname).toEqual(".txt");
   expect(new Path("foo.").extname).toEqual(".");
   expect(new Path("foo").extname).toEqual("");
@@ -324,7 +324,7 @@ test(".extname", async () => {
   expect(() => new Path("/").extname).toThrow();
 });
 
-test(".existsAsFile()", async () => {
+test.concurrent(".existsAsFile()", async () => {
   const filePath = (await Path.makeTempDir()).join("file.txt");
   expect(await filePath.exists()).toBe(false);
   expect(await filePath.exists({ mustBe: "file" })).toBe(false);
@@ -342,7 +342,7 @@ test(".existsAsFile()", async () => {
   expect(await filePath.existsAsFile()).toBe(true);
 });
 
-test(".existsAsDir()", async () => {
+test.concurrent(".existsAsDir()", async () => {
   const filePath = await Path.makeTempDir();
   expect(await filePath.exists()).toBe(true);
   expect(() => filePath.exists({ mustBe: "file" })).toThrow(
@@ -357,14 +357,14 @@ test(".existsAsDir()", async () => {
   expect(await filePath.existsAsDir()).toBe(false);
 });
 
-test(".mkdir(…) (un-nested)", async () => {
+test.concurrent(".mkdir(…) (un-nested)", async () => {
   const dir = (await Path.makeTempDir()).join("mkdir-test");
   expect(await dir.exists()).toBe(false);
   await dir.mkdir();
   expect(await dir.exists()).toBe(true);
 });
 
-test(".mkdir(…) (nested)", async () => {
+test.concurrent(".mkdir(…) (nested)", async () => {
   const dir = (await Path.makeTempDir()).join("mkdir-test/nested");
   expect(await dir.exists()).toBe(false);
   expect(() => dir.mkdir({ recursive: false })).toThrow("no such file");
@@ -372,7 +372,7 @@ test(".mkdir(…) (nested)", async () => {
   expect(await dir.exists()).toBe(true);
 });
 
-test(".cp(…)", async () => {
+test.concurrent(".cp(…)", async () => {
   const parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
@@ -386,7 +386,7 @@ test(".cp(…)", async () => {
   expect(await file2.exists()).toBe(true);
 });
 
-test(".rename(…)", async () => {
+test.concurrent(".rename(…)", async () => {
   const parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
@@ -400,7 +400,7 @@ test(".rename(…)", async () => {
   expect(await file2.exists()).toBe(true);
 });
 
-test(".makeTempDir(…)", async () => {
+test.concurrent(".makeTempDir(…)", async () => {
   let asyncDisposablePathString: string;
   {
     await using tempDir = await Path.makeTempDir();
@@ -421,7 +421,7 @@ test(".makeTempDir(…)", async () => {
   expect(await new Path(asyncDisposablePathString2).existsAsDir()).toBe(false);
 });
 
-test(".rm(…) (file)", async () => {
+test.concurrent(".rm(…) (file)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("");
   expect(await file.existsAsFile()).toBe(true);
@@ -431,7 +431,7 @@ test(".rm(…) (file)", async () => {
   expect(async () => file.rm()).toThrowError(/ENOENT/);
 });
 
-test(".rm(…) (folder)", async () => {
+test.concurrent(".rm(…) (folder)", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.txt");
   await file.write("");
@@ -443,7 +443,7 @@ test(".rm(…) (folder)", async () => {
   expect(async () => tempDir.rm()).toThrowError(/ENOENT/);
 });
 
-test(".rmDir(…)", async () => {
+test.concurrent(".rmDir(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.txt");
   await file.write("");
@@ -455,7 +455,7 @@ test(".rmDir(…)", async () => {
   expect(async () => tempDir.rmDir()).toThrowError(/ENOENT/);
 });
 
-test(".rm_rf(…) (file)", async () => {
+test.concurrent(".rm_rf(…) (file)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("");
   expect(await file.existsAsFile()).toBe(true);
@@ -466,7 +466,7 @@ test(".rm_rf(…) (file)", async () => {
   expect(await file.existsAsFile()).toBe(false);
 });
 
-test(".rm_rf(…) (folder)", async () => {
+test.concurrent(".rm_rf(…) (folder)", async () => {
   const tempDir = await Path.makeTempDir();
   await tempDir.join("file.txt").write("");
   expect(tempDir.path).toContain("/js-temp-");
@@ -477,7 +477,7 @@ test(".rm_rf(…) (folder)", async () => {
   expect(await tempDir.exists()).toBe(false);
 });
 
-test(".readText()", async () => {
+test.concurrent(".readText()", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.write("hi");
   await file.write("bye");
@@ -486,7 +486,7 @@ test(".readText()", async () => {
   expect(await readFile(file.path, "utf-8")).toBe("bye");
 });
 
-test(".readJSON()", async () => {
+test.concurrent(".readJSON()", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   await file.write(JSON.stringify({ foo: "bar" }));
 
@@ -497,7 +497,7 @@ test(".readJSON()", async () => {
   >({ foo: "bar" });
 });
 
-test(".readJSON(…) with fallback", async () => {
+test.concurrent(".readJSON(…) with fallback", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.json");
   const json: { foo?: number } = await file.readJSON({ fallback: { foo: 4 } });
@@ -515,7 +515,7 @@ test(".readJSON(…) with fallback", async () => {
   );
 });
 
-test(".write(…)", async () => {
+test.concurrent(".write(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.json");
   expect(await file.write("foo")).toBe(file);
@@ -531,14 +531,14 @@ test(".write(…)", async () => {
   ).toEqual("bar");
 });
 
-test(".writeJSON(…)", async () => {
+test.concurrent(".writeJSON(…)", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   expect(await file.writeJSON({ foo: "bar" })).toBe(file);
 
   expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
-test(".appendFile(…)", async () => {
+test.concurrent(".appendFile(…)", async () => {
   const file = (await Path.makeTempDir()).join("file.txt");
   await file.appendFile("test\n");
   expect(await file.readText()).toEqual("test\n");
@@ -546,7 +546,7 @@ test(".appendFile(…)", async () => {
   expect(await file.readText()).toEqual("test\nmore\n");
 });
 
-test(".readDir(…)", async () => {
+test.concurrent(".readDir(…)", async () => {
   const dir = await Path.makeTempDir();
   await dir.join("file.txt").write("hello");
   await dir.join("dir/file.json").write("hello");
@@ -560,7 +560,7 @@ test(".readDir(…)", async () => {
   );
 });
 
-test(".symlink(…)", async () => {
+test.concurrent(".symlink(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
@@ -572,7 +572,7 @@ test(".symlink(…)", async () => {
   expect(await target.readText()).toEqual("hello");
 });
 
-test(".realpath(…)", async () => {
+test.concurrent(".realpath(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   await source.write("hello world!");
@@ -583,7 +583,7 @@ test(".realpath(…)", async () => {
   );
 });
 
-test(".stat(…)", async () => {
+test.concurrent(".stat(…)", async () => {
   const file = (await Path.makeTempDir()).join("foo.txt");
   await file.write("hello");
 
@@ -592,7 +592,7 @@ test(".stat(…)", async () => {
   expect((await file.stat({ bigint: true })).size).toBeTypeOf("bigint");
 });
 
-test(".lstat(…)", async () => {
+test.concurrent(".lstat(…)", async () => {
   const tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
@@ -605,7 +605,7 @@ test(".lstat(…)", async () => {
   expect(await target.readText()).toEqual("hello");
 });
 
-test(".chmod(…)", async () => {
+test.concurrent(".chmod(…)", async () => {
   const binPath = (await Path.makeTempDir()).join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
@@ -624,7 +624,7 @@ echo hi`);
   expect(await new PrintableShellCommand(binPath, []).text()).toEqual("hi\n");
 });
 
-test(".chmodX(…)", async () => {
+test.concurrent(".chmodX(…)", async () => {
   const binPath = (await Path.makeTempDir()).join("nonexistent.bin");
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
@@ -649,18 +649,18 @@ echo hi`);
   expect((await binPath.stat()).mode & constants.S_IXUSR).toBeTruthy();
 });
 
-test(".homedir", async () => {
+test.concurrent(".homedir", async () => {
   expect(Path.homedir.path).toEqual("/mock/home/dir");
 });
 
-test(".cwd", async () => {
+test.concurrent(".cwd", async () => {
   expect(Path.cwd.basename.path).toEqual("path-class");
   const tempDir = await Path.makeTempDir();
   chdir(tempDir.path);
   expect(await realpath(Path.cwd.path)).toEqual(await realpath(tempDir.path));
 });
 
-test(".xdg", async () => {
+test.concurrent(".xdg", async () => {
   expect(Path.xdg.cache.path).toEqual("/mock/home/dir/.cache");
   expect(Path.xdg.config.path).toEqual("/xdg/config");
   expect(Path.xdg.data.path).toEqual("/mock/home/dir/.local/share");
@@ -674,6 +674,7 @@ test(".xdg", async () => {
 const spy = spyOn(console, "log");
 
 test(".debugPrint(…)", async () => {
+  spy.mockReset();
   Path.homedir.debugPrint("Here is a test log of the mock home directory:");
   expect(spy.mock.calls).toEqual([
     ["Here is a test log of the mock home directory:"],
@@ -682,6 +683,7 @@ test(".debugPrint(…)", async () => {
 });
 
 test(".stringifyIfPath(…)", async () => {
+  spy.mockReset();
   expect(stringifyIfPath(Path.homedir)).toBe("/mock/home/dir");
   expect(stringifyIfPath("/mock/home/dir")).toBe("/mock/home/dir");
   expect(stringifyIfPath(4)).toBe(4);
