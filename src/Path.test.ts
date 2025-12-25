@@ -406,7 +406,7 @@ test.concurrent(".rename(…)", async () => {
   expect(await file2.exists()).toBe(true);
   expect(await file3.exists()).toBe(false);
 
-  await file2.rename(file3);
+  expect((await file2.rename(file3)).path).toEqual(file3.path);
   expect(await file2.exists()).toBe(false);
   expect(await file3.exists()).toBe(true);
 });

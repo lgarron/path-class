@@ -460,12 +460,13 @@ export class Path {
   async rename(
     destination: string | URL | Path,
     options?: { createIntermediateDirs?: boolean },
-  ): Promise<void> {
+  ): Promise<Path> {
     const destinationPath = new Path(destination);
     if (options?.createIntermediateDirs ?? true) {
       await destinationPath.parent.mkdir();
     }
     await rename(this.#path, destinationPath.#path);
+    return destinationPath;
   }
 
   /**

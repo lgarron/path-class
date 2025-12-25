@@ -88,7 +88,7 @@ test.concurrent(".renameSync(…)", () => {
   expect(file2.existsSync()).toBe(true);
   expect(file3.existsSync()).toBe(false);
 
-  file2.renameSync(file3);
+  expect(file2.renameSync(file3).path).toEqual(file3.path);
   expect(file2.existsSync()).toBe(false);
   expect(file3.existsSync()).toBe(true);
 });

@@ -153,12 +153,13 @@ export class PathSync extends Path {
   renameSync(
     destination: string | URL | Path,
     options?: { createIntermediateDirs?: boolean },
-  ): void {
+  ): PathSync {
     const destinationPath = new PathSync(destination);
     if (options?.createIntermediateDirs ?? true) {
       destinationPath.parent.mkdirSync();
     }
     renameSync(this.path, destinationPath.path);
+    return destinationPath;
   }
 
   static makeTempDirSync(prefix?: string): PathSync {
