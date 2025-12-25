@@ -144,10 +144,17 @@ export class PathSync extends Path {
 
   cpSync(
     destination: string | URL | Path,
-    options?: Parameters<typeof cpSync>[2],
+    options?: Parameters<typeof cpSync>[2] & {
+      createIntermediateDirs?: boolean;
+    },
   ): PathSync {
-    cpSync(this.path, new Path(destination).path, options);
-    return new PathSync(destination);
+    const { createIntermediateDirs, ...cpOptions } = options ?? {};
+    const destinationPath = new PathSync(destination);
+    if (createIntermediateDirs ?? true) {
+      destinationPath.parent.mkdirSync();
+    }
+    cpSync(this.path, destinationPath.path, cpOptions);
+    return destinationPath;
   }
 
   renameSync(

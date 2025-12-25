@@ -450,10 +450,15 @@ export class Path {
   /** Returns the destination path. */
   async cp(
     destination: string | URL | Path,
-    options?: Parameters<typeof cp>[2],
+    options?: Parameters<typeof cp>[2] & { createIntermediateDirs?: boolean },
   ): Promise<Path> {
-    await cp(this.#path, new Path(destination).#path, options);
-    return new Path(destination);
+    const { createIntermediateDirs, ...cpOptions } = options ?? {};
+    const destinationPath = new Path(destination);
+    if (createIntermediateDirs ?? true) {
+      await destinationPath.parent.mkdir();
+    }
+    await cp(this.#path, destinationPath.#path, cpOptions);
+    return destinationPath;
   }
 
   // TODO: check idempotency semantics when the destination exists and is a folder.
