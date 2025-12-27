@@ -508,6 +508,13 @@ test.concurrent(".readText()", async () => {
   expect(await readFile(file.path, "utf-8")).toBe("bye");
 });
 
+test.concurrent(".readLines()", async () => {
+  const file = (await Path.makeTempDir()).join("file.txt");
+  await file.write("hi\nbye\n");
+
+  expect(await Array.fromAsync(file.readLines())).toEqual(["hi", "bye"]);
+});
+
 test.concurrent(".readJSON()", async () => {
   const file = (await Path.makeTempDir()).join("file.json");
   await file.write(JSON.stringify({ foo: "bar" }));

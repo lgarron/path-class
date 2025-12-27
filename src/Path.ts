@@ -1,3 +1,4 @@
+import { createReadStream } from "node:fs";
 import {
   appendFile,
   chmod,
@@ -19,6 +20,7 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { cwd } from "node:process";
+import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
@@ -522,6 +524,18 @@ export class Path {
 
   async readText(): Promise<string> {
     return readFile(this.#path, "utf-8");
+  }
+
+  /**
+   * Yields one line from the text of the line at a time.
+   *
+   * This uses streams, so it can be considerably more efficient than calling e.g. `.split("\n")` on the output of {@link readText `.readText()`}.
+   *
+   * Note that this function does not have a `.readLinesSync()` counterpart.
+   */
+  async *readLines(): AsyncIterable<string> {
+    const stream = createReadStream(this.#path, "utf-8");
+    yield* createInterface({ input: stream, terminal: false });
   }
 
   /**
