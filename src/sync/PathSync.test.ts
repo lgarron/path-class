@@ -107,15 +107,29 @@ test.concurrent(".renameSync(…)", () => {
   expect(file3.existsSync()).toBe(true);
 });
 
-test.concurrent(".makeTempDirSync(…)", () => {
-  using tempDir = PathSync.makeTempDirSync();
-  expect(tempDir.path).toContain("/js-temp-");
-  expect(tempDir.basename.path).toStartWith("js-temp-");
-  expect(tempDir.existsAsDirSync()).toBe(true);
+test.concurrent(".makeTempDirSync(…)", async () => {
+  let asyncDisposablePathString: string;
+  {
+    using tempDir = PathSync.makeTempDirSync();
+    asyncDisposablePathString = tempDir.path;
+    expect(tempDir.path).toContain("/js-temp-");
+    expect(tempDir.basename.path).toStartWith("js-temp-");
+    expect(await tempDir.existsAsDir()).toBe(true);
+  }
+  expect(await new PathSync(asyncDisposablePathString).existsAsDir()).toBe(
+    false,
+  );
 
-  using tempDir2 = PathSync.makeTempDirSync("foo");
-  expect(tempDir2.path).not.toContain("/js-temp-");
-  expect(tempDir2.basename.path).toStartWith("foo");
+  let asyncDisposablePathString2: string;
+  {
+    using tempDir2 = PathSync.makeTempDirSync("foo");
+    asyncDisposablePathString2 = tempDir2.path;
+    expect(tempDir2.path).not.toContain("/js-temp-");
+    expect(tempDir2.basename.path).toStartWith("foo");
+  }
+  expect(await new PathSync(asyncDisposablePathString2).existsAsDir()).toBe(
+    false,
+  );
 });
 
 test.concurrent(".rmSync(…) (file)", () => {
