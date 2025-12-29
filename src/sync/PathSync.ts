@@ -169,8 +169,8 @@ export class PathSync extends Path {
     return destinationPath;
   }
 
-  static makeTempDirSync(prefix?: string): PathSync {
-    return new PathSync(
+  static makeTempDirSync(prefix?: string): DisposablePathSync {
+    return new DisposablePathSync(
       mkdtempSync(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
     );
   }
@@ -278,5 +278,11 @@ export class PathSync extends Path {
       mode | constants.S_IXUSR | constants.S_IXGRP | constants.S_IXOTH,
     );
     return this;
+  }
+}
+
+export class DisposablePathSync extends PathSync {
+  [Symbol.dispose]() {
+    this.rm_rfSync();
   }
 }
