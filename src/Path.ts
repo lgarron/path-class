@@ -739,8 +739,3 @@ export function mustNotHaveTrailingSlash(path: Path): void {
     );
   }
 }
-
-const tmp = await Path.makeTempDir();
-(await tmp.join("foo.json").write("foo")).rename(
-  tmp.join("sdfsD", "sdfsdfsdf", "sdfsdf.json"),
-);
