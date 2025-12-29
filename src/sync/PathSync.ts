@@ -25,6 +25,8 @@ import type {
   statSyncType,
 } from "./modifiedNodeTypes";
 
+const DEFAULT_TEMP_PREFIX = "js-temp-sync-";
+
 export class PathSync extends Path {
   static override fromString(s: string): PathSync {
     return new PathSync(s);
@@ -171,7 +173,9 @@ export class PathSync extends Path {
 
   static makeTempDirSync(prefix?: string): DisposablePathSync {
     return new DisposablePathSync(
-      mkdtempSync(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
+      mkdtempSync(
+        new Path(tmpdir()).join(prefix ?? DEFAULT_TEMP_PREFIX).toString(),
+      ),
     );
   }
 

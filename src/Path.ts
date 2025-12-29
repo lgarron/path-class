@@ -76,6 +76,8 @@ export function resolutionPrefix(pathString: string): ResolutionPrefix {
   return ResolutionPrefix.Bare;
 }
 
+const DEFAULT_TEMP_PREFIX = "js-temp-";
+
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
   #path: string;
@@ -496,7 +498,9 @@ export class Path {
    * */
   static async makeTempDir(prefix?: string): Promise<AsyncDisposablePath> {
     return new AsyncDisposablePath(
-      await mkdtemp(new Path(tmpdir()).join(prefix ?? "js-temp-").toString()),
+      await mkdtemp(
+        new Path(tmpdir()).join(prefix ?? DEFAULT_TEMP_PREFIX).toString(),
+      ),
     );
   }
 
