@@ -324,48 +324,50 @@ test.concurrent(".extname", async () => {
   expect(() => new Path("/").extname).toThrow();
 });
 
-test.concurrent(".existsAsFile()", async () => {
-  const filePath = (await Path.makeTempDir()).join("file.txt");
-  expect(await filePath.exists()).toBe(false);
-  expect(await filePath.exists({ mustBe: "file" })).toBe(false);
-  expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
-  expect(await filePath.existsAsFile()).toBe(false);
-  expect(() => filePath.join("./").existsAsFile()).toThrow(
+test(".existsAsFile()", async () => {
+  await using file = await Path.tempFilePath({ basename: "file.txt" });
+  expect(await file.exists()).toBe(false);
+  expect(await file.exists({ mustBe: "file" })).toBe(false);
+  expect(await file.exists({ mustBe: "directory" })).toBe(false);
+  expect(await file.existsAsFile()).toBe(false);
+  expect(() => file.join("./").existsAsFile()).toThrow(
     "Path ends with a slash, which cannot be treated as a file.",
   );
-  await filePath.write("test");
-  expect(await filePath.exists()).toBe(true);
-  expect(await filePath.exists({ mustBe: "file" })).toBe(true);
-  expect(() => filePath.exists({ mustBe: "directory" })).toThrow(
+  await file.write("test");
+  expect(await file.exists()).toBe(true);
+  expect(await file.exists({ mustBe: "file" })).toBe(true);
+  expect(() => file.exists({ mustBe: "directory" })).toThrow(
     /Path exists but is not a directory/,
   );
-  expect(await filePath.existsAsFile()).toBe(true);
+  expect(await file.existsAsFile()).toBe(true);
 });
 
 test.concurrent(".existsAsDir()", async () => {
-  const filePath = await Path.makeTempDir();
-  expect(await filePath.exists()).toBe(true);
-  expect(() => filePath.exists({ mustBe: "file" })).toThrow(
+  await using tempDir = await Path.makeTempDir();
+  expect(await tempDir.exists()).toBe(true);
+  expect(() => tempDir.exists({ mustBe: "file" })).toThrow(
     /Path exists but is not a file/,
   );
-  expect(await filePath.exists({ mustBe: "directory" })).toBe(true);
-  expect(await filePath.existsAsDir()).toBe(true);
-  await filePath.rm_rf();
-  expect(await filePath.exists()).toBe(false);
-  expect(await filePath.exists({ mustBe: "file" })).toBe(false);
-  expect(await filePath.exists({ mustBe: "directory" })).toBe(false);
-  expect(await filePath.existsAsDir()).toBe(false);
+  expect(await tempDir.exists({ mustBe: "directory" })).toBe(true);
+  expect(await tempDir.existsAsDir()).toBe(true);
+  await tempDir.rm_rf();
+  expect(await tempDir.exists()).toBe(false);
+  expect(await tempDir.exists({ mustBe: "file" })).toBe(false);
+  expect(await tempDir.exists({ mustBe: "directory" })).toBe(false);
+  expect(await tempDir.existsAsDir()).toBe(false);
 });
 
 test.concurrent(".mkdir(…) (un-nested)", async () => {
-  const dir = (await Path.makeTempDir()).join("mkdir-test");
+  await using tempDir = await Path.makeTempDir();
+  const dir = tempDir.join("mkdir-test");
   expect(await dir.exists()).toBe(false);
   await dir.mkdir();
   expect(await dir.exists()).toBe(true);
 });
 
 test.concurrent(".mkdir(…) (nested)", async () => {
-  const dir = (await Path.makeTempDir()).join("mkdir-test/nested");
+  await using tempDir = await Path.makeTempDir();
+  const dir = tempDir.join("mkdir-test/nested");
   expect(await dir.exists()).toBe(false);
   expect(() => dir.mkdir({ recursive: false })).toThrow("no such file");
   await dir.mkdir();
@@ -373,7 +375,7 @@ test.concurrent(".mkdir(…) (nested)", async () => {
 });
 
 test.concurrent(".cp(…)", async () => {
-  const parentDir = await Path.makeTempDir();
+  await using parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
   const file3 = parentDir.join("nonexistent/dirs/file3.txt");
@@ -398,7 +400,7 @@ test.concurrent(".cp(…)", async () => {
 });
 
 test.concurrent(".rename(…)", async () => {
-  const parentDir = await Path.makeTempDir();
+  await using parentDir = await Path.makeTempDir();
   const file1 = parentDir.join("file1.txt");
   const file2 = parentDir.join("file2.txt");
   const file3 = parentDir.join("nonexistent/dirs/file3.txt");
@@ -444,17 +446,17 @@ test.concurrent(".makeTempDir(…)", async () => {
 });
 
 test.concurrent(".rm(…) (file)", async () => {
-  const file = (await Path.makeTempDir()).join("file.txt");
-  await file.write("");
-  expect(await file.existsAsFile()).toBe(true);
-  await file.rm();
-  expect(await file.existsAsFile()).toBe(false);
-  expect(await file.parent.existsAsDir()).toBe(true);
-  expect(async () => file.rm()).toThrowError(/ENOENT/);
+  await using filePath = await Path.tempFilePath({ basename: "file.txt" });
+  await filePath.write("");
+  expect(await filePath.existsAsFile()).toBe(true);
+  await filePath.rm();
+  expect(await filePath.existsAsFile()).toBe(false);
+  expect(await filePath.parent.existsAsDir()).toBe(true);
+  expect(async () => filePath.rm()).toThrowError(/ENOENT/);
 });
 
 test.concurrent(".rm(…) (folder)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.txt");
   await file.write("");
   expect(await tempDir.existsAsDir()).toBe(true);
@@ -466,7 +468,7 @@ test.concurrent(".rm(…) (folder)", async () => {
 });
 
 test.concurrent(".rmDir(…)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.txt");
   await file.write("");
   expect(await tempDir.existsAsDir()).toBe(true);
@@ -478,7 +480,7 @@ test.concurrent(".rmDir(…)", async () => {
 });
 
 test.concurrent(".rm_rf(…) (file)", async () => {
-  const file = (await Path.makeTempDir()).join("file.txt");
+  await using file = await Path.tempFilePath({ basename: "file.txt" });
   await file.write("");
   expect(await file.existsAsFile()).toBe(true);
   await file.rm_rf();
@@ -489,7 +491,7 @@ test.concurrent(".rm_rf(…) (file)", async () => {
 });
 
 test.concurrent(".rm_rf(…) (folder)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   await tempDir.join("file.txt").write("");
   expect(tempDir.path).toContain("/js-temp-");
   expect(await tempDir.exists()).toBe(true);
@@ -500,7 +502,7 @@ test.concurrent(".rm_rf(…) (folder)", async () => {
 });
 
 test.concurrent(".readText()", async () => {
-  const file = (await Path.makeTempDir()).join("file.txt");
+  await using file = await Path.tempFilePath({ basename: "file.txt" });
   await file.write("hi");
   await file.write("bye");
 
@@ -509,14 +511,14 @@ test.concurrent(".readText()", async () => {
 });
 
 test.concurrent(".readLines()", async () => {
-  const file = (await Path.makeTempDir()).join("file.txt");
+  await using file = await Path.tempFilePath({ basename: "file.txt" });
   await file.write("hi\nbye\n");
 
   expect(await Array.fromAsync(file.readLines())).toEqual(["hi", "bye"]);
 });
 
 test.concurrent(".readJSON()", async () => {
-  const file = (await Path.makeTempDir()).join("file.json");
+  await using file = await Path.tempFilePath({ basename: "file.json" });
   await file.write(JSON.stringify({ foo: "bar" }));
 
   expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
@@ -527,7 +529,7 @@ test.concurrent(".readJSON()", async () => {
 });
 
 test.concurrent(".readJSON(…) with fallback", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.json");
   const json: { foo?: number } = await file.readJSON({ fallback: { foo: 4 } });
   expect(json).toEqual({ foo: 4 });
@@ -545,7 +547,7 @@ test.concurrent(".readJSON(…) with fallback", async () => {
 });
 
 test.concurrent(".write(…)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const file = tempDir.join("file.json");
   expect(await file.write("foo")).toBe(file);
 
@@ -561,14 +563,14 @@ test.concurrent(".write(…)", async () => {
 });
 
 test.concurrent(".writeJSON(…)", async () => {
-  const file = (await Path.makeTempDir()).join("file.json");
+  await using file = await Path.tempFilePath({ basename: "file.json" });
   expect(await file.writeJSON({ foo: "bar" })).toBe(file);
 
   expect(await file.readJSON()).toEqual<Record<string, string>>({ foo: "bar" });
 });
 
 test.concurrent(".appendFile(…)", async () => {
-  const file = (await Path.makeTempDir()).join("file.txt");
+  await using file = await Path.tempFilePath({ basename: "file.txt" });
   await file.appendFile("test\n");
   expect(await file.readText()).toEqual("test\n");
   await file.appendFile("more\n");
@@ -576,7 +578,7 @@ test.concurrent(".appendFile(…)", async () => {
 });
 
 test.concurrent(".readDir(…)", async () => {
-  const dir = await Path.makeTempDir();
+  await using dir = await Path.makeTempDir();
   await dir.join("file.txt").write("hello");
   await dir.join("dir/file.json").write("hello");
 
@@ -590,7 +592,7 @@ test.concurrent(".readDir(…)", async () => {
 });
 
 test.concurrent(".symlink(…)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
   await source.symlink(target);
@@ -602,7 +604,7 @@ test.concurrent(".symlink(…)", async () => {
 });
 
 test.concurrent(".realpath(…)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   await source.write("hello world!");
   const target = tempDir.join("bar.txt");
@@ -613,7 +615,7 @@ test.concurrent(".realpath(…)", async () => {
 });
 
 test.concurrent(".stat(…)", async () => {
-  const file = (await Path.makeTempDir()).join("foo.txt");
+  await using file = await Path.tempFilePath({ basename: "foo.txt" });
   await file.write("hello");
 
   expect((await file.stat()).size).toEqual(5);
@@ -622,7 +624,7 @@ test.concurrent(".stat(…)", async () => {
 });
 
 test.concurrent(".lstat(…)", async () => {
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   const source = tempDir.join("foo.txt");
   const target = tempDir.join("bar.txt");
   await source.symlink(target);
@@ -635,7 +637,9 @@ test.concurrent(".lstat(…)", async () => {
 });
 
 test.concurrent(".chmod(…)", async () => {
-  const binPath = (await Path.makeTempDir()).join("nonexistent.bin");
+  await using binPath = await Path.tempFilePath({
+    basename: "nonexistent.bin",
+  });
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
   );
@@ -654,7 +658,9 @@ echo hi`);
 });
 
 test.concurrent(".chmodX(…)", async () => {
-  const binPath = (await Path.makeTempDir()).join("nonexistent.bin");
+  await using binPath = await Path.tempFilePath({
+    basename: "nonexistent.bin",
+  });
   expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
     /ENOENT|Premature close/,
   );
@@ -684,7 +690,7 @@ test.concurrent(".homedir", async () => {
 
 test.concurrent(".cwd", async () => {
   expect(Path.cwd.basename.path).toEqual("path-class");
-  const tempDir = await Path.makeTempDir();
+  await using tempDir = await Path.makeTempDir();
   chdir(tempDir.path);
   expect(await realpath(Path.cwd.path)).toEqual(await realpath(tempDir.path));
 });
