@@ -77,6 +77,7 @@ export function resolutionPrefix(pathString: string): ResolutionPrefix {
 }
 
 const DEFAULT_TEMP_PREFIX = "js-temp-";
+const DEFAULT_TEMP_FILE_NAME = "file";
 
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
@@ -504,6 +505,44 @@ export class Path {
     );
   }
 
+  /**
+   * Return a path:
+   *
+   * - whose parent dir is a temp dir that *has* been created, but
+   * - which has itself not yet been created.
+   *
+   * Note that this path can actually also be used to create dir, but it is most
+   * convenient to get a path for a temporary file that can be written to, while
+   * having a disposal implementation that cleans everything up:
+   *
+   *     await using tempFile = await Path.tempFilePath({ basename: "foo.txt" });
+   *     await tempFile.write("hello world!");
+   *     // …
+   *
+   * Note that that the following are equivalent when *not* using `await using`:
+   *
+   *     await Path.tempFilePath({ basename: "foo.txt" });
+   *     (await Path.makeTempDir()).join("file.txt");
+   *
+   * However, it is recommended to use `await using` to ensure cleanup.
+   */
+  static async tempFilePath(options: {
+    tempDirPrefix?: string;
+    basename?: string | Path;
+  }): Promise<AsyncDisposablePath> {
+    const tempDir = new Path(
+      await mkdtemp(
+        new Path(tmpdir())
+          .join(options?.tempDirPrefix ?? DEFAULT_TEMP_PREFIX)
+          .toString(),
+      ),
+    );
+    return new AsyncDisposablePath(
+      tempDir.join(options?.basename ?? DEFAULT_TEMP_FILE_NAME),
+      { disposePathInstead: tempDir },
+    );
+  }
+
   async rm(options?: Parameters<typeof rm>[1]): Promise<void> {
     await rm(this.#path, options);
   }
@@ -715,8 +754,21 @@ export class Path {
 }
 
 export class AsyncDisposablePath extends Path {
+  #options?: { disposePathInstead: Path };
+  constructor(
+    path: ConstructorParameters<typeof Path>[0],
+    options?: { disposePathInstead: Path | string },
+  ) {
+    super(path);
+    if (options) {
+      this.#options = {
+        disposePathInstead: new Path(options.disposePathInstead),
+      };
+    }
+  }
+
   async [Symbol.asyncDispose]() {
-    await this.rm_rf();
+    await (this.#options?.disposePathInstead ?? this).rm_rf();
   }
 }
 

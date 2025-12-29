@@ -26,6 +26,7 @@ import type {
 } from "./modifiedNodeTypes";
 
 const DEFAULT_TEMP_PREFIX = "js-temp-sync-";
+const DEFAULT_TEMP_FILE_NAME = "file";
 
 export class PathSync extends Path {
   static override fromString(s: string): PathSync {
@@ -179,6 +180,44 @@ export class PathSync extends Path {
     );
   }
 
+  /**
+   * Return a path:
+   *
+   * - whose parent dir is a temp dir that *has* been created, but
+   * - which has itself not yet been created.
+   *
+   * Note that this path can actually also be used to create dir, but it is most
+   * convenient to get a path for a temporary file that can be written to, while
+   * having a disposal implementation that cleans everything up:
+   *
+   *     using tempFile = await Path.tempFilePathSync({ basename: "foo.txt" });
+   *     tempFile.write("hello world!");
+   *     // …
+   *
+   * Note that that the following are equivalent when *not* using `await using`:
+   *
+   *     await Path.tempFilePathSync({ basename: "foo.txt" });
+   *     (await Path.makeTempDirSync()).join("file.txt");
+   *
+   * However, it is recommended to use `using` to ensure cleanup.
+   */
+  static tempFilePathSync(options: {
+    tempDirPrefix?: string;
+    basename?: string | Path;
+  }): DisposablePathSync {
+    const tempDir = new PathSync(
+      mkdtempSync(
+        new Path(tmpdir())
+          .join(options?.tempDirPrefix ?? DEFAULT_TEMP_PREFIX)
+          .toString(),
+      ),
+    );
+    return new DisposablePathSync(
+      tempDir.join(options?.basename ?? DEFAULT_TEMP_FILE_NAME),
+      { disposePathInstead: tempDir },
+    );
+  }
+
   rmSync(options?: Parameters<typeof rmSync>[1]): void {
     rmSync(this.path, options);
   }
@@ -286,7 +325,20 @@ export class PathSync extends Path {
 }
 
 export class DisposablePathSync extends PathSync {
+  #options?: { disposePathInstead: PathSync };
+  constructor(
+    path: ConstructorParameters<typeof Path>[0],
+    options?: { disposePathInstead: Path | string },
+  ) {
+    super(path);
+    if (options) {
+      this.#options = {
+        disposePathInstead: new PathSync(options.disposePathInstead),
+      };
+    }
+  }
+
   [Symbol.dispose]() {
-    this.rm_rfSync();
+    (this.#options?.disposePathInstead ?? this).rm_rfSync();
   }
 }
