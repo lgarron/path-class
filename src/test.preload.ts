@@ -1,3 +1,6 @@
+// Note: we do not import from the library implementation here, because we need
+// our setup to occur before the code loads.
+
 import { afterAll, mock } from "bun:test";
 import assert from "node:assert";
 import { mkdtemp, rmdir } from "node:fs/promises";
