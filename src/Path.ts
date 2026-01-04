@@ -234,7 +234,6 @@ export class Path {
       return null;
     }
     for (let i = 0; i < thisParts.length; i++) {
-      console.log(i, thisParts[i], otherParts[i]);
       if (thisParts[i] !== otherParts[i]) {
         return null;
       }
