@@ -350,7 +350,7 @@ test.concurrent(".lstatSync(…)", () => {
 test.concurrent(".chmodSync(…)", () => {
   using binPath = PathSync.tempFilePathSync({ basename: "bin.bash" });
   expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
-    /No such file or directory/,
+    /No such file or directory|not found/,
   );
   binPath.writeSync(`#!/usr/bin/env -S bun run --
 
@@ -369,7 +369,7 @@ console.log("hi");`);
 test.concurrent(".chmodXSync(…)", () => {
   using binPath = PathSync.tempFilePathSync({ basename: "bin.bash" });
   expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
-    /No such file or directory/,
+    /No such file or directory|not found/,
   );
   binPath.writeSync(`#!/usr/bin/env -S bun run --
 

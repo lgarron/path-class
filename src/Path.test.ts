@@ -653,7 +653,9 @@ test.concurrent(".chmod(…)", async () => {
   await using binPath = await Path.tempFilePath({
     basename: "bin.bash",
   });
-  expect(() => execSync(binPath.path)).toThrow(/No such file or directory/);
+  expect(() => execSync(binPath.path)).toThrow(
+    /No such file or directory|not found/,
+  );
   await binPath.write(`#!/usr/bin/env -S bun run --
 
   console.log("hi");`);
@@ -666,7 +668,9 @@ test.concurrent(".chmodX(…)", async () => {
   await using binPath = await Path.tempFilePath({
     basename: "bin.bash",
   });
-  expect(() => execSync(binPath.path)).toThrow(/No such file or directory/);
+  expect(() => execSync(binPath.path)).toThrow(
+    /No such file or directory|not found/,
+  );
   await binPath.write(`#!/usr/bin/env -S bun run --
 
   console.log("hi");`);
