@@ -6,6 +6,40 @@ import { execSync } from "node:child_process";
 import { constants } from "node:fs/promises";
 import { PathSync } from "./PathSync";
 
+test.concurrent("PathSync.resolve(…)", () => {
+  expect(PathSync.resolve("foo/lish", new PathSync("/bar/baz")).path).toEqual(
+    "/bar/foo/lish",
+  );
+  expect(PathSync.resolve("foo/lish", new PathSync("/bar/baz/")).path).toEqual(
+    "/bar/baz/foo/lish",
+  );
+  expect(
+    () => PathSync.resolve("foo/lish", new PathSync("bar/baz")).path,
+  ).toThrow(/must be an absolute path/);
+  expect(PathSync.resolve("foo/lish", import.meta.url).path).toEqual(
+    new PathSync(import.meta.url).parent.join("foo/lish").path,
+  );
+  expect(PathSync.resolve("foo", "file:///hello/world").path).toEqual(
+    "/hello/foo",
+  );
+  expect(PathSync.resolve("foo", "file:///hello/world/").path).toEqual(
+    "/hello/world/foo",
+  );
+});
+
+test.concurrent(".resolve(…)", () => {
+  expect(new PathSync("/bar/baz").resolve("foo/lish").path).toEqual(
+    "/bar/foo/lish",
+  );
+  expect(new PathSync("/bar/baz/").resolve("foo/lish").path).toEqual(
+    "/bar/baz/foo/lish",
+  );
+  expect(() => new PathSync("bar/baz").resolve("foo/lish").path).toThrow(
+    /must be an absolute path/,
+  );
+  expect(new PathSync("/bar/baz").resolve("foo/lish")).toBeInstanceOf(PathSync);
+});
+
 test.concurrent(".existsAsFileSync()", () => {
   using filePath = PathSync.tempFilePathSync({ basename: "file.txt" });
   expect(filePath.existsSync()).toBe(false);

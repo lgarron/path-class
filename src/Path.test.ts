@@ -83,6 +83,9 @@ test.concurrent("Path.resolve(…)", async () => {
   expect(Path.resolve("foo/lish", new Path("/bar/baz")).path).toEqual(
     "/bar/foo/lish",
   );
+  expect(Path.resolve("foo/lish", new Path("/bar/baz/")).path).toEqual(
+    "/bar/baz/foo/lish",
+  );
   expect(() => Path.resolve("foo/lish", new Path("bar/baz")).path).toThrow(
     /must be an absolute path/,
   );
@@ -92,6 +95,18 @@ test.concurrent("Path.resolve(…)", async () => {
   expect(Path.resolve("foo", "file:///hello/world").path).toEqual("/hello/foo");
   expect(Path.resolve("foo", "file:///hello/world/").path).toEqual(
     "/hello/world/foo",
+  );
+});
+
+test.concurrent(".resolve(…)", async () => {
+  expect(new Path("/bar/baz").resolve("foo/lish").path).toEqual(
+    "/bar/foo/lish",
+  );
+  expect(new Path("/bar/baz/").resolve("foo/lish").path).toEqual(
+    "/bar/baz/foo/lish",
+  );
+  expect(() => new Path("bar/baz").resolve("foo/lish").path).toThrow(
+    /must be an absolute path/,
   );
 });
 

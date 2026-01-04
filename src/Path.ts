@@ -130,6 +130,17 @@ export class Path {
     return new Path(new URL(Path.#pathlikeToString(path), baseURL));
   }
 
+  /**
+   * Convenience function. The following are equivalent:
+   *
+   *     B.resolve(A);
+   *     Path.resolve(A, B);
+   *
+   */
+  resolve(path: string | URL | Path): Path {
+    return Path.resolve(path, this);
+  }
+
   static #pathlikeToString(path: string | URL | Path): string {
     if (path instanceof Path) {
       return path.#path;

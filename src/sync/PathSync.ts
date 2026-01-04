@@ -37,6 +37,10 @@ export class PathSync extends Path {
     return new PathSync(Path.resolve(...args));
   }
 
+  override resolve(...args: Parameters<Path["resolve"]>): PathSync {
+    return new PathSync(super.resolve(...args));
+  }
+
   override toggleTrailingSlash(
     ...args: Parameters<Path["toggleTrailingSlash"]>
   ): PathSync {
