@@ -190,14 +190,14 @@ export class PathSync extends Path {
    * convenient to get a path for a temporary file that can be written to, while
    * having a disposal implementation that cleans everything up:
    *
-   *     using tempFile = await Path.tempFilePathSync({ basename: "foo.txt" });
-   *     tempFile.write("hello world!");
+   *     using tempFile = PathSync.tempFilePathSync({ basename: "foo.txt" });
+   *     tempFile.writeSync("hello world!");
    *     // …
    *
-   * Note that that the following are equivalent when *not* using `await using`:
+   * Note that that the following are equivalent when *not* using `using`:
    *
-   *     await Path.tempFilePathSync({ basename: "foo.txt" });
-   *     (await Path.makeTempDirSync()).join("file.txt");
+   *     PathSync.tempFilePathSync({ basename: "foo.txt" });
+   *     PathSync.makeTempDirSync().join("file.txt");
    *
    * However, it is recommended to use `using` to ensure cleanup.
    */
