@@ -36,6 +36,7 @@ import type {
   readFileType,
   statType,
 } from "./modifiedNodeTypes";
+import { stringifyIfPath } from "./stringifyfIfPath";
 
 // Note that (non-static) functions in this file are defined using `function(…)
 // { … }` rather than arrow functions, specifically because we want `this` to
@@ -770,22 +771,6 @@ export class AsyncDisposablePath extends Path {
   async [Symbol.asyncDispose]() {
     await (this.#options?.disposePathInstead ?? this).rm_rf();
   }
-}
-
-/**
- * This function is useful to serialize any `Path`s in a structure to pass on to
- * functions that do not know about the `Path` class, e.g.
- *
- *     function process(args: (string | Path)[]) {
- *       const argsAsStrings = args.map(stringifyIfPath);
- *     }
- *
- */
-export function stringifyIfPath<T>(value: T | Path): T | string {
-  if (value instanceof Path) {
-    return value.toString();
-  }
-  return value;
 }
 
 export function mustNotHaveTrailingSlash(path: Path): void {

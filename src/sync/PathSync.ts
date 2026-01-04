@@ -205,13 +205,7 @@ export class PathSync extends Path {
     tempDirPrefix?: string;
     basename?: string | Path;
   }): DisposablePathSync {
-    const tempDir = new PathSync(
-      mkdtempSync(
-        new Path(tmpdir())
-          .join(options?.tempDirPrefix ?? DEFAULT_TEMP_PREFIX)
-          .toString(),
-      ),
-    );
+    const tempDir = PathSync.makeTempDirSync(options?.tempDirPrefix);
     return new DisposablePathSync(
       tempDir.join(options?.basename ?? DEFAULT_TEMP_FILE_NAME),
       { disposePathInstead: tempDir },

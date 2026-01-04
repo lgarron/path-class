@@ -5,11 +5,15 @@ import { join } from "node:path";
 import { env } from "node:process";
 import { ErgonomicDate } from "ergonomic-date";
 
+const MOCK_TEMP_DIR_ENV_VAR = "MOCK_TEMP_DIR";
+
 const mockTempDir = await (async () => {
-  const { MOCK_TEMP_DIR } = env;
-  if (MOCK_TEMP_DIR) {
-    console.log(`Using the specificed mock temp dir: ${MOCK_TEMP_DIR}`);
-    return MOCK_TEMP_DIR;
+  if (MOCK_TEMP_DIR_ENV_VAR in env) {
+    const tempDir = env[MOCK_TEMP_DIR_ENV_VAR];
+    console.log(
+      `Using the specificed mock temp dir from the \`${MOCK_TEMP_DIR_ENV_VAR}\` env var: ${tempDir}`,
+    );
+    return tempDir;
   } else {
     const mockTempDir = await mkdtemp(
       join(

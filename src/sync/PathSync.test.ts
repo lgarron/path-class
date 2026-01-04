@@ -2,12 +2,11 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import "./PathSync";
+import { execSync } from "node:child_process";
 import { constants } from "node:fs/promises";
-import { PrintableShellCommand } from "printable-shell-command";
 import { PathSync } from "./PathSync";
 
-// test.concurrent(".existsAsFileSync()", () => {
-test(".existsAsFileSync()", () => {
+test.concurrent(".existsAsFileSync()", () => {
   using filePath = PathSync.tempFilePathSync({ basename: "file.txt" });
   expect(filePath.existsSync()).toBe(false);
   expect(filePath.existsSync({ mustBe: "file" })).toBe(false);
@@ -314,46 +313,47 @@ test.concurrent(".lstatSync(…)", () => {
   expect(target.readTextSync()).toEqual("hello");
 });
 
+// Note: this test uses `execSync(…)` because it runs the binary and returns
+// expected error messages correctly. Further, it helps keep this entire test
+// file sync (which we have some basic checks for in `lint-sync-code.ts` that
+// don't seem like a great idea to work around).
 test.concurrent(".chmodSync(…)", () => {
-  using binPath = PathSync.tempFilePathSync({ basename: "nonexistent.bin" });
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /ENOENT|Premature close/,
+  using binPath = PathSync.tempFilePathSync({ basename: "bin.bash" });
+  expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
+    /No such file or directory/,
   );
-  binPath.writeSync(`#!/usr/bin/env bash
+  binPath.writeSync(`#!/usr/bin/env -S bun run --
 
-echo hi`);
-  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
-  //    binPath.writeSync(`#!/usr/bin/env -S bun run --
-
-  // console.log("hi");`);
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /EACCES|Premature close/,
+console.log("hi");`);
+  expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
+    /Permission denied/,
   );
   binPath.chmodSync(0o755);
-  expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
+  expect(execSync(binPath.path, { encoding: "utf-8" })).toEqual("hi\n");
 });
 
+// Note: this test uses `execSync(…)` because it runs the binary and returns
+// expected error messages correctly. Further, it helps keep this entire test
+// file sync (which we have some basic checks for in `lint-sync-code.ts` that
+// don't seem like a great idea to work around).
 test.concurrent(".chmodXSync(…)", () => {
-  const binPath = PathSync.tempFilePathSync({ basename: "nonexistent.bin" });
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /ENOENT|Premature close/,
+  using binPath = PathSync.tempFilePathSync({ basename: "bin.bash" });
+  expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
+    /No such file or directory/,
   );
-  binPath.writeSync(`#!/usr/bin/env bash
+  binPath.writeSync(`#!/usr/bin/env -S bun run --
 
-echo hi`);
-  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
-  //    binPath.writeSync(`#!/usr/bin/env -S bun run --
-
-  // console.log("hi");`);
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /EACCES|Premature close/,
+console.log("hi");`);
+  // TODO: Should not be `ENOENT`? Probably `EACCES`.
+  expect(() => execSync(binPath.path, { stdio: ["ignore"] })).toThrow(
+    /Permission denied/,
   );
   expect(binPath.statSync().mode & constants.S_IWUSR).toBeTruthy();
   binPath.chmodSync(0o444);
   expect(binPath.statSync().mode & constants.S_IWUSR).toBeFalsy();
   expect(binPath.statSync().mode & constants.S_IXUSR).toBeFalsy();
   binPath.chmodXSync();
-  expect(() => new PrintableShellCommand(binPath, []).text()).not.toThrow();
+  expect(execSync(binPath.path, { encoding: "utf-8" })).toEqual("hi\n");
   expect(binPath.statSync().mode & constants.S_IWUSR).toBeFalsy();
   expect(binPath.statSync().mode & constants.S_IXUSR).toBeTruthy();
 });

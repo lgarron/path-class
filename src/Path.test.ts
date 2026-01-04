@@ -1,9 +1,9 @@
-import { expect, spyOn, test } from "bun:test";
+import { expect, jest, spyOn, test } from "bun:test";
+import { execSync } from "node:child_process";
 import { constants, readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { chdir } from "node:process";
-import { PrintableShellCommand } from "printable-shell-command";
-import { Path, ResolutionPrefix, stringifyIfPath } from "./Path";
+import { Path, ResolutionPrefix } from "./Path";
 
 test.concurrent("constructor", async () => {
   expect(new Path("bare").path).toEqual("bare");
@@ -324,7 +324,7 @@ test.concurrent(".extname", async () => {
   expect(() => new Path("/").extname).toThrow();
 });
 
-test(".existsAsFile()", async () => {
+test.concurrent(".existsAsFile()", async () => {
   await using file = await Path.tempFilePath({ basename: "file.txt" });
   expect(await file.exists()).toBe(false);
   expect(await file.exists({ mustBe: "file" })).toBe(false);
@@ -452,7 +452,7 @@ test.concurrent(".rm(…) (file)", async () => {
   await filePath.rm();
   expect(await filePath.existsAsFile()).toBe(false);
   expect(await filePath.parent.existsAsDir()).toBe(true);
-  expect(async () => filePath.rm()).toThrowError(/ENOENT/);
+  expect(async () => filePath.rm()).toThrow(/^ENOENT/);
 });
 
 test.concurrent(".rm(…) (folder)", async () => {
@@ -460,11 +460,11 @@ test.concurrent(".rm(…) (folder)", async () => {
   const file = tempDir.join("file.txt");
   await file.write("");
   expect(await tempDir.existsAsDir()).toBe(true);
-  expect(async () => tempDir.rm()).toThrowError(/EACCES|EFAULT/);
+  expect(async () => tempDir.rm()).toThrow(/^(EACCES|EFAULT)/);
   await file.rm();
   await tempDir.rm({ recursive: true });
   expect(await tempDir.existsAsDir()).toBe(false);
-  expect(async () => tempDir.rm()).toThrowError(/ENOENT/);
+  expect(async () => tempDir.rm()).toThrow(/^ENOENT/);
 });
 
 test.concurrent(".rmDir(…)", async () => {
@@ -472,11 +472,11 @@ test.concurrent(".rmDir(…)", async () => {
   const file = tempDir.join("file.txt");
   await file.write("");
   expect(await tempDir.existsAsDir()).toBe(true);
-  expect(async () => tempDir.rmDir()).toThrowError(/ENOTEMPTY/);
+  expect(async () => tempDir.rmDir()).toThrow(/^ENOTEMPTY/);
   await file.rm();
   await tempDir.rmDir();
   expect(await tempDir.existsAsDir()).toBe(false);
-  expect(async () => tempDir.rmDir()).toThrowError(/ENOENT/);
+  expect(async () => tempDir.rmDir()).toThrow(/^ENOENT/);
 });
 
 test.concurrent(".rm_rf(…) (file)", async () => {
@@ -541,9 +541,7 @@ test.concurrent(".readJSON(…) with fallback", async () => {
   });
   expect(json2).toEqual({ foo: 6 });
 
-  expect(() => tempDir.readJSON({ fallback: { foo: 4 } })).toThrowError(
-    /^EISDIR/,
-  );
+  expect(() => tempDir.readJSON({ fallback: { foo: 4 } })).toThrow(/^EISDIR/);
 });
 
 test.concurrent(".write(…)", async () => {
@@ -597,7 +595,7 @@ test.concurrent(".symlink(…)", async () => {
   const target = tempDir.join("bar.txt");
   await source.symlink(target);
   expect(await target.existsAsFile()).toBe(false);
-  expect(() => target.readText()).toThrow(/ENOENT/);
+  expect(() => target.readText()).toThrow(/^ENOENT/);
   await source.write("hello");
   expect(await target.existsAsFile()).toBe(true);
   expect(await target.readText()).toEqual("hello");
@@ -638,48 +636,32 @@ test.concurrent(".lstat(…)", async () => {
 
 test.concurrent(".chmod(…)", async () => {
   await using binPath = await Path.tempFilePath({
-    basename: "nonexistent.bin",
+    basename: "bin.bash",
   });
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /ENOENT|Premature close/,
-  );
-  await binPath.write(`#!/usr/bin/env bash
+  expect(() => execSync(binPath.path)).toThrow(/No such file or directory/);
+  await binPath.write(`#!/usr/bin/env -S bun run --
 
-echo hi`);
-  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
-  //   await binPath.write(`#!/usr/bin/env -S bun run --
-
-  // console.log("hi");`);
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /EACCES|Premature close/,
-  );
+  console.log("hi");`);
+  expect(() => execSync(binPath.path)).toThrow(/Permission denied/);
   await binPath.chmod(0o755);
-  expect(await new PrintableShellCommand(binPath, []).text()).toEqual("hi\n");
+  expect(execSync(binPath.path, { encoding: "utf-8" })).toEqual("hi\n");
 });
 
 test.concurrent(".chmodX(…)", async () => {
   await using binPath = await Path.tempFilePath({
-    basename: "nonexistent.bin",
+    basename: "bin.bash",
   });
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /ENOENT|Premature close/,
-  );
-  await binPath.write(`#!/usr/bin/env bash
+  expect(() => execSync(binPath.path)).toThrow(/No such file or directory/);
+  await binPath.write(`#!/usr/bin/env -S bun run --
 
-echo hi`);
-  // TODO: why doesn't this work here instead (but works in `printable-shell-comand`)?
-  //   await binPath.write(`#!/usr/bin/env -S bun run --
-
-  // console.log("hi");`);
-  expect(() => new PrintableShellCommand(binPath, []).text()).toThrow(
-    /EACCES|Premature close/,
-  );
+  console.log("hi");`);
+  expect(() => execSync(binPath.path)).toThrow(/Permission denied/);
   expect((await binPath.stat()).mode & constants.S_IWUSR).toBeTruthy();
   await binPath.chmod(0o444);
   expect((await binPath.stat()).mode & constants.S_IWUSR).toBeFalsy();
   expect((await binPath.stat()).mode & constants.S_IXUSR).toBeFalsy();
   await binPath.chmodX();
-  expect(await new PrintableShellCommand(binPath, []).text()).toEqual("hi\n");
+  expect(execSync(binPath.path, { encoding: "utf-8" })).toEqual("hi\n");
   expect((await binPath.stat()).mode & constants.S_IWUSR).toBeFalsy();
   expect((await binPath.stat()).mode & constants.S_IXUSR).toBeTruthy();
 });
@@ -688,11 +670,14 @@ test.concurrent(".homedir", async () => {
   expect(Path.homedir.path).toEqual("/mock/home/dir");
 });
 
-test.concurrent(".cwd", async () => {
+// This is serial because it can break binary execution tests elsewhere.
+test.serial(".cwd", async () => {
+  const originalCwd = Path.cwd;
   expect(Path.cwd.basename.path).toEqual("path-class");
   await using tempDir = await Path.makeTempDir();
   chdir(tempDir.path);
   expect(await realpath(Path.cwd.path)).toEqual(await realpath(tempDir.path));
+  chdir(originalCwd.path);
 });
 
 test.concurrent(".xdg", async () => {
@@ -706,20 +691,12 @@ test.concurrent(".xdg", async () => {
   );
 });
 
-const spy = spyOn(console, "log");
-
-test(".debugPrint(…)", async () => {
-  spy.mockReset();
+test.concurrent(".debugPrint(…)", async () => {
+  const spy = spyOn(console, "log");
   Path.homedir.debugPrint("Here is a test log of the mock home directory:");
   expect(spy.mock.calls).toEqual([
     ["Here is a test log of the mock home directory:"],
     ["/mock/home/dir"],
   ]);
-});
-
-test(".stringifyIfPath(…)", async () => {
-  spy.mockReset();
-  expect(stringifyIfPath(Path.homedir)).toBe("/mock/home/dir");
-  expect(stringifyIfPath("/mock/home/dir")).toBe("/mock/home/dir");
-  expect(stringifyIfPath(4)).toBe(4);
+  jest.restoreAllMocks();
 });

@@ -21,13 +21,22 @@ test:
 	bun test
 
 .PHONY: lint
-lint: setup
+lint: lint-main lint-tsc-main lint-tsc-examples
+
+.PHONY: lint-main
+lint-main: setup
 	bun x -- bun-dx --package @biomejs/biome biome -- check
 	bun x -- bun-dx --package readme-cli-help readme-cli-help -- check
 	# There should be no `async`/`await` in the sync code.
 	grep -r "async\|await" ./src/sync/ || true
 	bun run ./script/lint-sync-code.ts
+
+.PHONY: lint-tsc-main
+lint-tsc-main: setup
 	bun x -- bun-dx --package typescript tsc -- --project .
+
+.PHONY: lint-tsc-examples
+lint-tsc-examples: setup
 	bun x -- bun-dx --package typescript tsc -- --project ./examples/
 
 .PHONY: format
