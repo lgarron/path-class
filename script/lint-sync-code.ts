@@ -35,7 +35,7 @@ for (const pathString of paths) {
           console.error(
             `Sync code contains keyword \`${keyword}\`: ${fileLinePath()}:${columnIndex + 1}-${columnIndex + 1 + keyword.length}`,
           );
-          exitCode = 0;
+          exitCode = 1;
         }
       }
     }
