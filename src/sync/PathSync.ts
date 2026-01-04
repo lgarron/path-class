@@ -41,6 +41,16 @@ export class PathSync extends Path {
     return new PathSync(super.resolve(...args));
   }
 
+  override descendantRelativePath(
+    ...args: Parameters<Path["descendantRelativePath"]>
+  ): PathSync | null {
+    const v = super.descendantRelativePath(...args);
+    if (v === null) {
+      return null;
+    }
+    return new PathSync(v);
+  }
+
   override toggleTrailingSlash(
     ...args: Parameters<Path["toggleTrailingSlash"]>
   ): PathSync {

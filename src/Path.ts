@@ -80,6 +80,27 @@ export function resolutionPrefix(pathString: string): ResolutionPrefix {
 const DEFAULT_TEMP_PREFIX = "js-temp-";
 const DEFAULT_TEMP_FILE_NAME = "file";
 
+function preserveRelativeResolutionPrefix(
+  pathString: string,
+  from: string,
+): string {
+  if (
+    resolutionPrefix(from) === ResolutionPrefix.Relative &&
+    resolutionPrefix(pathString) !== ResolutionPrefix.Relative
+  ) {
+    // We don't have to handle the case of `"."`, as it already starts with `"."`
+    return `./${pathString}`;
+  }
+  return pathString;
+}
+
+function joinPreservingRelativeResolutionPrefix(
+  base: string,
+  relative: string[],
+): string {
+  return preserveRelativeResolutionPrefix(join(base, ...relative), base);
+}
+
 export class Path {
   // @ts-expect-error ts(2564): False positive. https://github.com/microsoft/TypeScript/issues/32194
   #path: string;
@@ -91,6 +112,27 @@ export class Path {
     this.#setNormalizedPath(s);
   }
 
+  static #pathlikeToString(path: string | URL | Path): string {
+    if (path instanceof Path) {
+      return path.#path;
+    }
+    if (path instanceof URL) {
+      return fileURLToPath(path);
+    }
+    if (typeof path === "string") {
+      // TODO: allow turning off this heuristic?
+      if (path.startsWith("file:///")) {
+        return fileURLToPath(path);
+      }
+      return path;
+    }
+    throw new Error("Invalid path");
+  }
+
+  // Preserves the `ResolutionPrefix` status when possible.
+  #setNormalizedPath(path: string): void {
+    this.#path = joinPreservingRelativeResolutionPrefix(path, []);
+  }
   static fromString(s: string): Path {
     if (typeof s !== "string") {
       throw new Error(
@@ -141,31 +183,69 @@ export class Path {
     return Path.resolve(path, this);
   }
 
-  static #pathlikeToString(path: string | URL | Path): string {
-    if (path instanceof Path) {
-      return path.#path;
+  /**
+   * Computes the relative path from an ancestor (this) to another path.
+   *
+   * - If the path is a descendant *or is the same path*, this returns a
+   *   relative path. Call {@link Path.asBare `.asBare()`} on the output if
+   *   needed.
+   * - The output is `null` unless the input paths are:
+   *   - Both absolute paths.
+   *   - Both relative paths. Resolve the paths before passing to this function
+   *     if needed.
+   * - Trailing slashes:
+   *   - By default, the ancestor path must have a trailing slash for the
+   *     function to be called. Pass `{ requireTrailingSlashForAncestor: false
+   *     }` if needed. Note that recombining the ancestor path with the output
+   *     using {@link Path.prototype.resolve `.resolve(…)` } does not result in
+   *     the original input path if the ancestor path did not have a trailing
+   *     slash.
+   *   - For the descendant/same path check, trailing slashes are ignored. In
+   *     particular, if the ancestor path has a trailing slash and the
+   *     descendant path is the same path without a trailing slash, this is
+   *     still considered to be the same path.
+   *   - The output has trailing slash if and only if:
+   *       - the input descendant does, or
+   *       - the output is the absolute path `/`.
+   */
+  descendantRelativePath(
+    potentialDescendant: string | URL | Path,
+    options?: { requireTrailingSlashForAncestor: boolean },
+  ): Path | null {
+    const requireTrailingSlashForAncestor =
+      options?.requireTrailingSlashForAncestor ?? true;
+    if (requireTrailingSlashForAncestor && !this.hasTrailingSlash()) {
+      throw new Error(
+        "Ancestor must have a trailing slash. Pass `{ requireTrailingSlashForAncestor: false }` if needed.",
+      );
     }
-    if (path instanceof URL) {
-      return fileURLToPath(path);
+
+    const other = new Path(potentialDescendant);
+    if (this.isAbsolutePath() !== other.isAbsolutePath()) {
+      return null;
     }
-    if (typeof path === "string") {
-      // TODO: allow turning off this heuristic?
-      if (path.startsWith("file:///")) {
-        return fileURLToPath(path);
+
+    // Leading slashes are okay, as they will result in a `""` component for
+    // absolute paths (and we don't compare absolute paths to relative paths.)
+    const thisParts = this.toggleTrailingSlash(false).#path.split("/");
+    const otherParts = other.toggleTrailingSlash(false).#path.split("/");
+
+    if (otherParts.length < thisParts.length) {
+      return null;
+    }
+    for (let i = 0; i < thisParts.length; i++) {
+      console.log(i, thisParts[i], otherParts[i]);
+      if (thisParts[i] !== otherParts[i]) {
+        return null;
       }
-      return path;
     }
-    throw new Error("Invalid path");
+    return new Path("./")
+      .join(...otherParts.slice(thisParts.length))
+      .toggleTrailingSlash(other.hasTrailingSlash());
   }
 
-  // Preserves the `ResolutionPrefix` status when possible.
-  #setNormalizedPath(path: string): void {
-    const prefix = resolutionPrefix(path);
-    this.#path = join(path);
-    if (prefix === ResolutionPrefix.Relative && !this.#path.startsWith(".")) {
-      // We don't have to handle the case of `"."`, as it already starts with `"."`
-      this.#path = `./${this.#path}`;
-    }
+  unresolve(path: string | URL | Path): Path {
+    return Path.resolve(path, this);
   }
 
   isAbsolutePath(): boolean {
@@ -252,7 +332,9 @@ export class Path {
       }
       return s;
     });
-    return new Path(join(this.#path, ...segmentStrings));
+    return new Path(
+      joinPreservingRelativeResolutionPrefix(this.#path, segmentStrings),
+    );
   }
 
   /**

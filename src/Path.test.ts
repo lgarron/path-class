@@ -1,4 +1,5 @@
 import { expect, jest, spyOn, test } from "bun:test";
+import assert from "node:assert";
 import { execSync } from "node:child_process";
 import { constants, readFile, realpath } from "node:fs/promises";
 import { join } from "node:path";
@@ -25,6 +26,8 @@ test.concurrent("constructor", async () => {
   expect(new Path("../").path).toEqual("../");
   expect(new Path(new URL("file:///root/")).path).toEqual("/root/");
   expect(new Path(new Path("foo")).path).toEqual("foo");
+
+  expect(new Path("./.foo").path).toEqual("./.foo");
 });
 
 test.concurrent(".fromString(…)", async () => {
@@ -110,6 +113,66 @@ test.concurrent(".resolve(…)", async () => {
   );
 });
 
+function mustNotBeNull<T>(t: T): Exclude<T, null> {
+  assert.notEqual(t, null);
+  // @ts-expect-error Cast
+  return t;
+}
+
+test.concurrent(".descendantRelativePath(…)", async () => {
+  expect(
+    mustNotBeNull(
+      new Path("/Users/lgarron/").descendantRelativePath(
+        "/Users/lgarron/Library",
+      ),
+    ).path,
+  ).toEqual("./Library");
+  expect(
+    mustNotBeNull(
+      new Path("/Users/lgarron/").descendantRelativePath(
+        "/Users/lgarron/Library/",
+      ),
+    ).path,
+  ).toEqual("./Library/");
+  expect(
+    () =>
+      mustNotBeNull(
+        new Path("/Users/lgarron").descendantRelativePath(
+          "/Users/lgarron/Library/",
+        ),
+      ).path,
+  ).toThrow("Ancestor must have a trailing slash.");
+  expect(
+    mustNotBeNull(
+      new Path("/Users/lgarron").descendantRelativePath(
+        "/Users/lgarron/Library/",
+        { requireTrailingSlashForAncestor: false },
+      ),
+    ).path,
+  ).toEqual("./Library/");
+  expect(
+    mustNotBeNull(
+      new Path("/Users/lgarron").descendantRelativePath(
+        "/Users/lgarron/Downloads/test.png",
+        { requireTrailingSlashForAncestor: false },
+      ),
+    ).path,
+  ).toEqual("./Downloads/test.png");
+  expect(
+    new Path("/Users/lgarron/").descendantRelativePath("/etc/hosts/"),
+  ).toBe(null);
+  expect(
+    new Path("/Users/lgarron/").descendantRelativePath("/Users/shared/"),
+  ).toBe(null);
+  expect(
+    mustNotBeNull(
+      new Path("/Users/lgarron/").descendantRelativePath(
+        "/Users/shared/../lgarron",
+      ),
+    ).path,
+  ).toBe(".");
+});
+
 test.concurrent(".isAbsolutePath()", async () => {
   expect(new Path("/foo/bar").isAbsolutePath()).toBe(true);
   expect(new Path("foo/bar").isAbsolutePath()).toBe(false);
@@ -147,6 +210,7 @@ test.concurrent(".toggleTrailingSlash(…)", async () => {
   expect(new Path(".").toggleTrailingSlash().path).toBe("./");
   expect(new Path("../").toggleTrailingSlash().path).toBe("..");
   expect(new Path("..").toggleTrailingSlash().path).toBe("../");
+  expect(new Path("./foo").toggleTrailingSlash().path).toEqual("./foo/");
 });
 
 test.concurrent(".blue", async () => {
@@ -166,6 +230,7 @@ test.concurrent("normalize", async () => {
 
 test.concurrent(".join(…)", async () => {
   expect(new Path("foo").join("bar").path).toEqual("foo/bar");
+  expect(new Path("./foo").join("bar").path).toEqual("./foo/bar");
   expect(new Path("foo/bar").join("bath", "kitchen/sink").path).toEqual(
     "foo/bar/bath/kitchen/sink",
   );
