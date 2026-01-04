@@ -1,5 +1,6 @@
-import { mock } from "bun:test";
-import { mkdtemp } from "node:fs/promises";
+import { afterAll, mock } from "bun:test";
+import assert from "node:assert";
+import { mkdtemp, rmdir } from "node:fs/promises";
 import nodeOS, { tmpdir } from "node:os";
 import { join } from "node:path";
 import { env } from "node:process";
@@ -10,6 +11,7 @@ const MOCK_TEMP_DIR_ENV_VAR = "MOCK_TEMP_DIR";
 const mockTempDir = await (async () => {
   if (MOCK_TEMP_DIR_ENV_VAR in env) {
     const tempDir = env[MOCK_TEMP_DIR_ENV_VAR];
+    assert(tempDir);
     console.log(
       `Using the specificed mock temp dir from the \`${MOCK_TEMP_DIR_ENV_VAR}\` env var: ${tempDir}`,
     );
@@ -24,6 +26,11 @@ const mockTempDir = await (async () => {
     console.log(
       `Using a mock temp dir inside the main temp dir: ${mockTempDir}`,
     );
+
+    afterAll(async () => {
+      // If this fails, one of the tests hasn't cleaned up after itself properly.
+      await rmdir(mockTempDir);
+    });
     return mockTempDir;
   }
 })();
