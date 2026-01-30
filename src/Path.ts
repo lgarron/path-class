@@ -17,7 +17,7 @@ import {
   symlink,
   writeFile,
 } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { cwd } from "node:process";
 import { createInterface } from "node:readline/promises";
@@ -796,8 +796,6 @@ export class Path {
   }
 
   static get homedir(): Path {
-    // Only access homedir when needed.
-    const { homedir } = globalThis.process.getBuiltinModule("node:os");
     return new Path(homedir());
   }
 
