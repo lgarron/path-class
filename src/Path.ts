@@ -17,19 +17,12 @@ import {
   symlink,
   writeFile,
 } from "node:fs/promises";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { cwd } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import {
-  xdgCache,
-  xdgConfig,
-  xdgData,
-  xdgRuntime,
-  xdgState,
-} from "xdg-basedir";
 import type {
   lstatType,
   readDirType,
@@ -37,6 +30,7 @@ import type {
   statType,
 } from "./modifiedNodeTypes";
 import { stringifyIfPath } from "./stringifyfIfPath";
+import { xdg } from "./xdg";
 
 // Note that (non-static) functions in this file are defined using `function(…)
 // { … }` rather than arrow functions, specifically because we want `this` to
@@ -802,6 +796,8 @@ export class Path {
   }
 
   static get homedir(): Path {
+    // Only access homedir when needed.
+    const { homedir } = globalThis.process.getBuiltinModule("node:os");
     return new Path(homedir());
   }
 
@@ -813,20 +809,7 @@ export class Path {
     return new Path(cwd()).toggleTrailingSlash(true);
   }
 
-  static xdg = {
-    cache: new Path(xdgCache ?? Path.homedir.join(".cache")),
-    config: new Path(xdgConfig ?? Path.homedir.join(".config")),
-    data: new Path(xdgData ?? Path.homedir.join(".local/share")),
-    state: new Path(xdgState ?? Path.homedir.join(".local/state")),
-    /**
-     * {@link Path.xdg.runtime} does not have a default value. Consider
-     * {@link Path.xdg.runtimeWithStateFallback} if you need a fallback but do not have a particular fallback in mind.
-     */
-    runtime: xdgRuntime ? new Path(xdgRuntime) : undefined,
-    runtimeWithStateFallback: xdgRuntime
-      ? new Path(xdgRuntime)
-      : new Path(xdgState ?? Path.homedir.join(".local/state")),
-  };
+  static xdg = xdg;
 
   /** Chainable function to print the path. Prints the same as:
    *
