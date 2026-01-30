@@ -1,4 +1,5 @@
 [install]
+auto = "disable"
 linker = "isolated"
 
 [test]
