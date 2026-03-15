@@ -28,18 +28,20 @@ const config: { counter?: number } = await info.readJSON({ fallback: {} });
 config.counter = (config.counter ?? 0) + 1;
 await info.writeJSON(config);
 
-// Extensive example: create temp dirs and files, fetch into path, chaining,
-// spawn subprocess, read JSON, and clean up.
-//
-// In this case the GitHub API supports direct file download, and you could
-// unzip in memory. However, the steps are a good illustration of diverse tasks
-// in a typical script.
-const tempDir = await Path.makeTempDir();
-const zipFile = await tempDir.join("file.zip").write(fetch("https://github.com/lgarron/path-class/archive/refs/tags/v0.7.2.zip"));
-await new PrintableShellCommand("unzip", [zipFile]).shellOut({ cwd: tempDir });
-const packageJSON = await tempDir.join("path-class-0.7.2/package.json").readJSON();
-console.log(packageJSON.exports);
-await tempDir.rm_rf();
+{
+  // Extensive example: create temp dirs and files, fetch into path, chaining,
+  // spawn subprocess, read JSON, and clean up.
+  //
+  // In this case the GitHub API supports direct file download, and you could
+  // unzip in memory. However, the steps are a good illustration of diverse tasks
+  // in a typical script.
+  await using tempDir = await Path.makeTempDir();
+  const zipFile = await tempDir.join("file.zip").write(fetch("https://github.com/lgarron/path-class/archive/refs/tags/v0.7.2.zip"));
+  await new PrintableShellCommand("unzip", [zipFile]).shellOut({ cwd: tempDir });
+  const packageJSON = await tempDir.join("path-class-0.7.2/package.json").readJSON();
+  console.log(packageJSON.exports);
+  // `tempDir` will be deleted from disk here, due to `await using` above.
+}
 ````
 
 ## Differences from `node` functions
