@@ -1,3 +1,23 @@
+# 🏔️ Moved to Codeberg 🏔️
+
+This repo is now maintained at:
+
+<span style="font-size: 200%"><a href="https://codeberg.org/lgarron/path-class">https://codeberg.org/lgarron/path-class</a></span>
+
+Original README contents are below.
+
+<br>
+<br>
+<br>
+<br>
+
+--------
+
+<br>
+<br>
+<br>
+<br>
+
 # `path-class`
 
 A semantic `Path` class for `node` and `bun`. Inspired by `bun`'s [`file(…)`](https://bun.com/docs/runtime/file-io) API, but `node`-compatible.
